@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "py-mvvm"
+version = "0.1.0"
+description = "A Python Package for Model-View-ViewModel pattern"
+authors = ["Yakubov, Sergey <yakubovs@ornl.gov>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "py_mvvm"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+trame = "^3.5.1"
+trame-vuetify = "^2.4.2"
+trame-vtk = "^2.8.0"
+numpy = "^1.26.3"
+trame-plotly = "^3.0.2"
+bioblend = "^1.2.0"
+plotly = "^5.18.0"
+plotly-resampler = "^0.9.2"
+matplotlib = "^3.8.2"
+pywebview = "^4.4.1"
+vtk-egl = {version="*", markers="sys_platform=='manylinux'"}
+pyqt6 = { version = "^6.7.0", optional = true }
+
+[[tool.poetry.source]]
+name = "vtk"
+url = "https://wheels.vtk.org"
+priority = "primary"
+
+[tool.poetry.extras]
+pyqt6 = ["pyqt6"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+start = "template_app.app:main"
