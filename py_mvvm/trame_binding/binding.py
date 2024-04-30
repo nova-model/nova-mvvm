@@ -22,7 +22,8 @@ class Communicator:
                 not isinstance(viewmodel_linked_object, dict) and
                 not inspect.isfunction(viewmodel_linked_object)):
             if not linked_object_attributes:
-                self.linked_object_attributes = viewmodel_linked_object.__dict__
+                self.linked_object_attributes = {k: v for k, v in viewmodel_linked_object.__dict__.items() if
+                                                 not k.startswith("_")}
             else:
                 self.linked_object_attributes = linked_object_attributes
 
