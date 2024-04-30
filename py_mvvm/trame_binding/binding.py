@@ -44,11 +44,6 @@ class Communicator:
         # GUI element (via it's name in Trame state object)
         # and a linked_object (passed during bind creation from ViewModel side)
         self.state_variable_name = state_variable_name
-        if state_variable_name:
-            self.state[self.state_variable_name] = {}
-        for attribute_name in self.linked_object_attributes or []:
-            name_in_state = self.get_name_in_state(attribute_name)
-            self.state[name_in_state] = ""
 
         # this updates ViewModel on state change
         if self.viewmodel_linked_object:
