@@ -45,6 +45,13 @@ class Communicator:
         # and a linked_object (passed during bind creation from ViewModel side)
         self.state_variable_name = state_variable_name
 
+        # we need to make sure state variable exists on connect since if it does not - Trame will not monitor it
+        if state_variable_name:
+            self.state.setdefault(self.state_variable_name, None)
+        for attribute_name in self.linked_object_attributes or []:
+            name_in_state = self.get_name_in_state(attribute_name)
+            self.state.setdefault(name_in_state, None)
+
         # this updates ViewModel on state change
         if self.viewmodel_linked_object:
             if self.linked_object_attributes:
