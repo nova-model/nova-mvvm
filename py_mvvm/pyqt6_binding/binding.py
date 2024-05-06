@@ -4,7 +4,13 @@ except:
     print("PyQt6 is missing. You could install 'py-mvvm[pyqt6]' to fix it")
     exit(1)
 
+import inspect
+
 from ..interface import BindingInterface, rsetattr
+
+
+def is_callable(var):
+    return inspect.isfunction(var) or inspect.ismethod(var)
 
 
 class Communicate(QObject):
@@ -19,7 +25,7 @@ class Communicate(QObject):
     def _update_viewmodel_callback(self, key=None, value=None):
         if isinstance(self.viewmodel_linked_object, dict):
             self.viewmodel_linked_object.update({key: value})
-        elif isinstance(self.viewmodel_linked_object, type(lambda: None)):
+        elif is_callable(self.viewmodel_linked_object):
             self.viewmodel_linked_object(value)
         elif isinstance(self.viewmodel_linked_object, object):
             rsetattr(self.viewmodel_linked_object, key, value)
