@@ -1,11 +1,11 @@
 [tool.poetry]
-name = "py-mvvm"
+name = "mvvm-lib"
 version = "0.2.0"
 description = "A Python Package for Model-View-ViewModel pattern"
 authors = ["Yakubov, Sergey <yakubovs@ornl.gov>"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "py_mvvm"}]
+packages = [{include = "mvvm_lib", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.10"
