@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mvvm-lib"
-version = "0.2.0"
+version = "0.3.0"
 description = "A Python Package for Model-View-ViewModel pattern"
 authors = ["Yakubov, Sergey <yakubovs@ornl.gov>"]
 license = "MIT"
@@ -9,13 +9,12 @@ packages = [{include = "mvvm_lib", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.10"
+trame = "^3.6.3"
 pyqt6 = { version = "^6.7.0", optional = true }
-trame = { version = "^3.5.1", optional = true }
 panel = { version = "^1.4.4", optional = true }
 
 [tool.poetry.extras]
 pyqt6 = ["pyqt6"]
-trame = ["trame"]
 panel = ["panel"]
 
 [build-system]
