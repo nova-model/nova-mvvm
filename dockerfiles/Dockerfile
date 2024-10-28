@@ -11,7 +11,7 @@ RUN pip install poetry
 COPY . /src
 WORKDIR /src
 
-RUN poetry install
+RUN poetry install -E pyqt6 -E panel
 RUN poetry build --format=wheel
 
 RUN chmod og+rwX -R /poetry
