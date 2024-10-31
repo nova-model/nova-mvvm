@@ -2,6 +2,8 @@
 
 from typing import Any, Optional
 
+from ..utils import rsetattr
+
 try:
     from PyQt6.QtCore import QObject, pyqtSignal
 except Exception:
@@ -10,14 +12,14 @@ except Exception:
 
 import inspect
 
-from ..interface import BindingInterface, rsetattr
+from ..interface import BindingInterface
 
 
 def is_callable(var: Any) -> bool:
     return inspect.isfunction(var) or inspect.ismethod(var)
 
 
-class Communicate(QObject):
+class Communicator(QObject):
     """Communicator class, that provides methods required for binding to communicate between ViewModel and View."""
 
     signal = pyqtSignal(object)
@@ -72,4 +74,4 @@ class PyQtBinding(BindingInterface):
         For PyQt we use pyqtSignal to trigger GU
         I update and linked_object to trigger ViewModel/Model update
         """
-        return Communicate(linked_object, linked_object_arguments, callback_after_update)
+        return Communicator(linked_object, linked_object_arguments, callback_after_update)

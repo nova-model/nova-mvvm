@@ -5,7 +5,8 @@ from typing import Any
 
 import param
 
-from ..interface import BindingInterface, rgetattr, rsetattr
+from ..interface import BindingInterface
+from ..utils import rgetattr, rsetattr
 
 
 def is_parameterized(var: Any) -> bool:
