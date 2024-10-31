@@ -7,6 +7,10 @@ readme = "README.md"
 license = "MIT"
 keywords = ["MVVM", "python"]
 
+[project.urls]
+"Documentation" = "https://mvvm-lib.readthedocs.io"
+"Repository" = "https://code.ornl.gov/ndip/public-packages/py-mvvm"
+
 [tool.poetry.dependencies]
 python = "^3.10"
 trame = "^3.6.3"
