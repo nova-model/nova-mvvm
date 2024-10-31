@@ -6,7 +6,7 @@ build:
     python: "3.12"
   jobs:
     post_create_environment:
-      - pip install altair sphinx-rtd-theme==3.0.0rc3
+      - pip install altair sphinx-rtd-theme==3.0.0rc3 tomli
       - pip install .
 
 sphinx:
