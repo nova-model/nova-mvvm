@@ -1,1 +1,3 @@
-from .binding import *
+from .binding import TrameBinding
+
+__all__ = ["TrameBinding"]

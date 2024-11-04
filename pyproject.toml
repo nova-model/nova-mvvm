@@ -1,11 +1,15 @@
 [tool.poetry]
 name = "mvvm-lib"
-version = "0.3.0"
+version = "0.3.1"
 description = "A Python Package for Model-View-ViewModel pattern"
 authors = ["Yakubov, Sergey <yakubovs@ornl.gov>"]
-license = "MIT"
 readme = "README.md"
-packages = [{include = "mvvm_lib", from = "src" }]
+license = "MIT"
+keywords = ["MVVM", "python"]
+
+[project.urls]
+"Documentation" = "https://mvvm-lib.readthedocs.io"
+"Repository" = "https://code.ornl.gov/ndip/public-packages/py-mvvm"
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -21,5 +25,74 @@ panel = ["panel"]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
+
+[tool.pytest.ini_options]
+pythonpath = [
+  ".", "src"
+]
+testpaths = ["tests"]
+python_files = ["test*.py"]
+norecursedirs = [".git", "tmp*", "_tmp*", "__pycache__"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "N",  # PEP8 naming convetions
+    "D"  # pydocstyle
+]
+ignore = [
+    "C901",  # too complex
+    "D102", # Missing docstring in public function
+    "D103", # Missing docstring in public method
+    "D401"  # imperative mood
+
+]
+
+[tool.ruff.lint.extend-per-file-ignores]
+'__init__.py' = ['D104'] # Missing docstring in public package
+
+
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.mypy]
+ignore_missing_imports = false
+check_untyped_defs = true
+disallow_untyped_defs = true
+ignore_errors = false
+disable_error_code = ["import-untyped"]
+# You can exclude files with the following (ONLY WHEN NECESSARY)
+# exclude = ["path/to/file"]
+
+[tool.coverage.report]
+omit = [
+    '*__init__*', # __init__ files should just re-export other classes and functions
+]
+
+[tool.coverage.run]
+command_line = "-m pytest --junit-xml=reports/junit.xml"
+data_file = "reports/.coverage"
+
+[tool.poetry.dev-dependencies]
+mypy = ">=1.10.0"
+pre-commit = ">=2.20.0"
+coverage = ">=6.4.3"
+pytest = "*"
+ruff = ">=0.6.2"
+copier=">=9.3"
+sphinx = "*"
+sphinx-rtd-theme = "*"
+sphinxcontrib-napoleon ="*"
+tomli = "^2.0.2"
+
 [tool.poetry.scripts]
-start = "template_app.app:main"
+app = "mvvm_lib:main"
