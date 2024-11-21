@@ -1,6 +1,11 @@
 """Binding module for PyQt6 framework."""
 
+import uuid
 from typing import Any, Optional
+
+from pydantic import BaseModel
+
+from mvvm_lib import bindings_map
 
 from ..utils import rsetattr
 
@@ -31,12 +36,23 @@ class Communicator(QObject):
         callback_after_update: Any = None,
     ) -> None:
         super().__init__()
+        self.id = str(uuid.uuid4())
+        bindings_map[self.id] = self
         self.viewmodel_linked_object = viewmodel_linked_object
         self.linked_object_attributes = linked_object_attributes
         self.callback_after_update = callback_after_update
 
     def _update_viewmodel_callback(self, key: Optional[str] = None, value: Any = None) -> None:
-        if isinstance(self.viewmodel_linked_object, dict):
+        if isinstance(self.viewmodel_linked_object, BaseModel):
+            model = self.viewmodel_linked_object.copy(deep=True)
+            rsetattr(model, key or "", value)
+            try:
+                new_model = model.__class__(**model.model_dump(warnings=False))
+                for f, v in new_model:
+                    setattr(self.viewmodel_linked_object, f, v)
+            except Exception:
+                pass
+        elif isinstance(self.viewmodel_linked_object, dict):
             self.viewmodel_linked_object.update({key: value})
         elif is_callable(self.viewmodel_linked_object):
             self.viewmodel_linked_object(value)
