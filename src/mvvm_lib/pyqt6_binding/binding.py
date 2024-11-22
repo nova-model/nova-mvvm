@@ -1,6 +1,5 @@
 """Binding module for PyQt6 framework."""
 
-import uuid
 from typing import Any, Optional
 
 from pydantic import BaseModel
@@ -35,7 +34,6 @@ class Communicator(QObject):
         callback_after_update: Any = None,
     ) -> None:
         super().__init__()
-        self.id = str(uuid.uuid4())
         self.viewmodel_linked_object = viewmodel_linked_object
         self.linked_object_attributes = linked_object_attributes
         self.callback_after_update = callback_after_update

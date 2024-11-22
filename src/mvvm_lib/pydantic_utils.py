@@ -13,13 +13,6 @@ logger = logging.getLogger(__name__)
 
 
 def get_nested_pydantic_field(model: BaseModel, field_path: str) -> FieldInfo:
-    """
-    Retrieves the Pydantic ModelField object for a nested field in a Pydantic model using a dot-separated field path.
-
-    :param model: Pydantic model instance
-    :param field_path: Dot-separated path to the field (e.g., "config.nested.nested2")
-    :return: The Pydantic ModelField instance
-    """
     fields = field_path.split(".")
     current_model: Any = model
 
@@ -54,10 +47,7 @@ def validate_pydantic_parameter(name: str, value: Any, index: int) -> str | None
     # get list of nested fields (if any) and get the corresponding model
     fields = name.split(".")
     for field in fields[:-1]:
-        if "[index]" in field:
-            field = field.removesuffix("[index]")
-            current_model = getattr(current_model, field)[index]
-        elif "[" in field:
+        if "[" in field:
             base = field.split("[")[0]
             indices = re.findall(r"\[(\d+)\]", field)
             indices = [int(num) for num in indices]
