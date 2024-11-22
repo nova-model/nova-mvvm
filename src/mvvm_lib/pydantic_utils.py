@@ -1,5 +1,6 @@
 """Pydantic utils."""
 
+import logging
 import re
 from typing import Any
 
@@ -7,6 +8,8 @@ from pydantic import BaseModel, ValidationError
 from pydantic.fields import FieldInfo
 
 from mvvm_lib import bindings_map
+
+logger = logging.getLogger(__name__)
 
 
 def get_nested_pydantic_field(model: BaseModel, field_path: str) -> FieldInfo:
@@ -44,7 +47,7 @@ def get_field_info(field_name: str) -> FieldInfo:
 
 def validate_pydantic_parameter(name: str, value: Any, index: int) -> str | None:
     if name not in bindings_map:
-        print(f"cannot find {name} in bindings_map")  # no error, just do not validate for now
+        logger.warning(f"cannot find {name} in bindings_map")  # no error, just do not validate for now
         return None
     binding = bindings_map[name]
     current_model = binding.viewmodel_linked_object
