@@ -1,7 +1,7 @@
 import importlib.metadata
 
+from .bindings_map import bindings_map
+
 __version__ = importlib.metadata.version(__package__)
 
-from typing import Any
-
-bindings_map: Any = {}
+__all__ = ["bindings_map"]

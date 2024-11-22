@@ -5,8 +5,7 @@ from typing import Any, Optional
 
 from pydantic import BaseModel
 
-from mvvm_lib import bindings_map
-
+from ..bindings_map import update_bindings_map
 from ..utils import rsetattr
 
 try:
@@ -37,7 +36,6 @@ class Communicator(QObject):
     ) -> None:
         super().__init__()
         self.id = str(uuid.uuid4())
-        bindings_map[self.id] = self
         self.viewmodel_linked_object = viewmodel_linked_object
         self.linked_object_attributes = linked_object_attributes
         self.callback_after_update = callback_after_update
@@ -74,9 +72,10 @@ class Communicator(QObject):
         else:
             return None
 
-    def update_in_view(self, *args: Any, **kwargs: Any) -> Any:
+    def update_in_view(self, value: Any, **kwargs: Any) -> Any:
         """Update a View (GUI) when called by a ViewModel."""
-        return self.signal.emit(*args, **kwargs)
+        update_bindings_map(value, self)
+        return self.signal.emit(value, **kwargs)
 
 
 class PyQtBinding(BindingInterface):

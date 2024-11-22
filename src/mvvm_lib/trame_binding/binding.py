@@ -3,15 +3,13 @@
 import asyncio
 import inspect
 import json
-import uuid
 from typing import Any, Callable, Optional, Union, cast
 
 from pydantic import BaseModel
 from trame_server.state import State
 from typing_extensions import override
 
-from mvvm_lib import bindings_map
-
+from ..bindings_map import update_bindings_map
 from ..interface import (
     BindingInterface,
     CallbackAfterUpdateType,
@@ -20,7 +18,7 @@ from ..interface import (
     LinkedObjectAttributesType,
     LinkedObjectType,
 )
-from ..utils import rgetattr, rsetattr
+from ..utils import normalize_field_name, rget_list_of_fields, rgetattr, rsetattr
 
 
 def is_async() -> bool:
@@ -35,18 +33,6 @@ def is_callable(var: Any) -> bool:
     return inspect.isfunction(var) or inspect.ismethod(var)
 
 
-def _get_nested_attributes(obj: Any, prefix: str = "") -> Any:
-    attributes = []
-    for k, v in obj.__dict__.items():
-        if not k.startswith("_"):  # Ignore private attributes
-            full_key = f"{prefix}.{k}" if prefix else k
-            if hasattr(v, "__dict__"):  # Check if the value is another object with attributes
-                attributes.extend(_get_nested_attributes(v, prefix=full_key))
-            else:
-                attributes.append(full_key)
-    return attributes
-
-
 class TrameCommunicator(Communicator):
     """Communicator implementation for Trame."""
 
@@ -58,8 +44,8 @@ class TrameCommunicator(Communicator):
         callback_after_update: CallbackAfterUpdateType = None,
     ) -> None:
         self.state = state
-        self.id = str(uuid.uuid4())
-        bindings_map[self.id] = self
+        update_bindings_map(viewmodel_linked_object, self)
+
         self.viewmodel_linked_object = viewmodel_linked_object
         self._set_linked_object_attributes(linked_object_attributes, viewmodel_linked_object)
         self.viewmodel_callback_after_update = callback_after_update
@@ -76,7 +62,7 @@ class TrameCommunicator(Communicator):
             and not is_callable(viewmodel_linked_object)
         ):
             if not linked_object_attributes:
-                self.linked_object_attributes = _get_nested_attributes(viewmodel_linked_object)
+                self.linked_object_attributes = rget_list_of_fields(viewmodel_linked_object)
             else:
                 self.linked_object_attributes = linked_object_attributes
 
@@ -89,6 +75,7 @@ class TrameCommunicator(Communicator):
         return self.connection.get_callback()
 
     def update_in_view(self, value: Any) -> None:
+        update_bindings_map(value, self)
         self.connection.update_in_view(value)
 
 
@@ -166,10 +153,9 @@ class StateConnection:
             self.state.dirty(name_in_state)
 
     def _get_name_in_state(self, attribute_name: str) -> str:
+        name_in_state = normalize_field_name(attribute_name)
         if self.state_variable_name:
-            name_in_state = f"{self.state_variable_name}_{attribute_name.replace('.', '_')}"
-        else:
-            name_in_state = attribute_name.replace(".", "_")
+            name_in_state = f"{self.state_variable_name}_{name_in_state}"
         return name_in_state
 
     def _connect(self) -> None:
