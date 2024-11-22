@@ -58,7 +58,7 @@ class TrameCommunicator(Communicator):
         if (
             viewmodel_linked_object
             and not isinstance(viewmodel_linked_object, dict)
-            and not isinstance(viewmodel_linked_object, BaseModel)
+            and not issubclass(type(viewmodel_linked_object), BaseModel)
             and not is_callable(viewmodel_linked_object)
         ):
             if not linked_object_attributes:
@@ -90,7 +90,7 @@ class CallBackConnection:
         self.linked_object_attributes = communicator.linked_object_attributes
 
     def _update_viewmodel_callback(self, value: Any, key: Optional[str] = None) -> None:
-        if isinstance(self.viewmodel_linked_object, BaseModel):
+        if self.viewmodel_linked_object and issubclass(type(self.viewmodel_linked_object), BaseModel):
             model = self.viewmodel_linked_object.copy(deep=True)
             rsetattr(model, key or "", value)
             try:
@@ -179,7 +179,7 @@ class StateConnection:
                 @self.state.change(state_variable_name)
                 def update_viewmodel_callback(**kwargs: dict) -> None:
                     success = True
-                    if isinstance(self.viewmodel_linked_object, BaseModel):
+                    if self.viewmodel_linked_object and issubclass(type(self.viewmodel_linked_object), BaseModel):
                         json_str = json.dumps(kwargs[state_variable_name])
                         try:
                             model = self.viewmodel_linked_object.model_validate_json(json_str)
@@ -197,7 +197,7 @@ class StateConnection:
                         self.viewmodel_callback_after_update(state_variable_name)
 
     def update_in_view(self, value: Any) -> None:
-        if hasattr(value, "model_dump"):
+        if issubclass(type(value), BaseModel):
             value = value.model_dump()
         if self.linked_object_attributes:
             for attribute_name in self.linked_object_attributes:

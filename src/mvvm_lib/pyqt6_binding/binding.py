@@ -41,7 +41,7 @@ class Communicator(QObject):
         self.callback_after_update = callback_after_update
 
     def _update_viewmodel_callback(self, key: Optional[str] = None, value: Any = None) -> None:
-        if isinstance(self.viewmodel_linked_object, BaseModel):
+        if issubclass(type(value), BaseModel):
             model = self.viewmodel_linked_object.copy(deep=True)
             rsetattr(model, key or "", value)
             try:

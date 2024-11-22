@@ -1,9 +1,9 @@
 """Abstract interfaces and type definitions."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Optional, Union
 
-LinkedObjectType = Optional[Union[object, Dict[str, Any], Callable]]
+LinkedObjectType = Optional[Any]
 LinkedObjectAttributesType = Optional[list[str]]
 CallbackAfterUpdateType = Optional[Callable[[Optional[str]], None]]
 ConnectCallbackType = Union[None, Callable[[Any, Optional[str]], None]]
