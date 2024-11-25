@@ -2,6 +2,9 @@
 
 from typing import Any, Optional
 
+from pydantic import BaseModel
+
+from ..bindings_map import update_bindings_map
 from ..utils import rsetattr
 
 try:
@@ -36,7 +39,16 @@ class Communicator(QObject):
         self.callback_after_update = callback_after_update
 
     def _update_viewmodel_callback(self, key: Optional[str] = None, value: Any = None) -> None:
-        if isinstance(self.viewmodel_linked_object, dict):
+        if issubclass(type(value), BaseModel):
+            model = self.viewmodel_linked_object.copy(deep=True)
+            rsetattr(model, key or "", value)
+            try:
+                new_model = model.__class__(**model.model_dump(warnings=False))
+                for f, v in new_model:
+                    setattr(self.viewmodel_linked_object, f, v)
+            except Exception:
+                pass
+        elif isinstance(self.viewmodel_linked_object, dict):
             self.viewmodel_linked_object.update({key: value})
         elif is_callable(self.viewmodel_linked_object):
             self.viewmodel_linked_object(value)
@@ -58,9 +70,10 @@ class Communicator(QObject):
         else:
             return None
 
-    def update_in_view(self, *args: Any, **kwargs: Any) -> Any:
+    def update_in_view(self, value: Any, **kwargs: Any) -> Any:
         """Update a View (GUI) when called by a ViewModel."""
-        return self.signal.emit(*args, **kwargs)
+        update_bindings_map(value, self)
+        return self.signal.emit(value, **kwargs)
 
 
 class PyQtBinding(BindingInterface):

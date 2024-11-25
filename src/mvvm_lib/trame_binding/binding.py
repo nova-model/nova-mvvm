@@ -2,11 +2,14 @@
 
 import asyncio
 import inspect
+import json
 from typing import Any, Callable, Optional, Union, cast
 
+from pydantic import BaseModel
 from trame_server.state import State
 from typing_extensions import override
 
+from ..bindings_map import update_bindings_map
 from ..interface import (
     BindingInterface,
     CallbackAfterUpdateType,
@@ -15,7 +18,7 @@ from ..interface import (
     LinkedObjectAttributesType,
     LinkedObjectType,
 )
-from ..utils import rgetattr, rsetattr
+from ..utils import normalize_field_name, rget_list_of_fields, rgetattr, rsetattr
 
 
 def is_async() -> bool:
@@ -41,6 +44,8 @@ class TrameCommunicator(Communicator):
         callback_after_update: CallbackAfterUpdateType = None,
     ) -> None:
         self.state = state
+        update_bindings_map(viewmodel_linked_object, self)
+
         self.viewmodel_linked_object = viewmodel_linked_object
         self._set_linked_object_attributes(linked_object_attributes, viewmodel_linked_object)
         self.viewmodel_callback_after_update = callback_after_update
@@ -53,12 +58,11 @@ class TrameCommunicator(Communicator):
         if (
             viewmodel_linked_object
             and not isinstance(viewmodel_linked_object, dict)
+            and not issubclass(type(viewmodel_linked_object), BaseModel)
             and not is_callable(viewmodel_linked_object)
         ):
             if not linked_object_attributes:
-                self.linked_object_attributes = [
-                    k for k in viewmodel_linked_object.__dict__.keys() if not k.startswith("_")
-                ]
+                self.linked_object_attributes = rget_list_of_fields(viewmodel_linked_object)
             else:
                 self.linked_object_attributes = linked_object_attributes
 
@@ -71,6 +75,7 @@ class TrameCommunicator(Communicator):
         return self.connection.get_callback()
 
     def update_in_view(self, value: Any) -> None:
+        update_bindings_map(value, self)
         self.connection.update_in_view(value)
 
 
@@ -85,7 +90,16 @@ class CallBackConnection:
         self.linked_object_attributes = communicator.linked_object_attributes
 
     def _update_viewmodel_callback(self, value: Any, key: Optional[str] = None) -> None:
-        if isinstance(self.viewmodel_linked_object, dict):
+        if self.viewmodel_linked_object and issubclass(type(self.viewmodel_linked_object), BaseModel):
+            model = self.viewmodel_linked_object.copy(deep=True)
+            rsetattr(model, key or "", value)
+            try:
+                new_model = model.__class__(**model.model_dump(warnings=False))
+                for f, v in new_model:
+                    setattr(self.viewmodel_linked_object, f, v)
+            except Exception:
+                pass
+        elif isinstance(self.viewmodel_linked_object, dict):
             if not key:
                 self.viewmodel_linked_object.update(value)
             else:
@@ -139,10 +153,9 @@ class StateConnection:
             self.state.dirty(name_in_state)
 
     def _get_name_in_state(self, attribute_name: str) -> str:
+        name_in_state = normalize_field_name(attribute_name)
         if self.state_variable_name:
-            name_in_state = f"{self.state_variable_name}_{attribute_name.replace('.', '_')}"
-        else:
-            name_in_state = attribute_name.replace(".", "_")
+            name_in_state = f"{self.state_variable_name}_{name_in_state}"
         return name_in_state
 
     def _connect(self) -> None:
@@ -165,16 +178,27 @@ class StateConnection:
 
                 @self.state.change(state_variable_name)
                 def update_viewmodel_callback(**kwargs: dict) -> None:
-                    if isinstance(self.viewmodel_linked_object, dict):
+                    success = True
+                    if self.viewmodel_linked_object and issubclass(type(self.viewmodel_linked_object), BaseModel):
+                        json_str = json.dumps(kwargs[state_variable_name])
+                        try:
+                            model = self.viewmodel_linked_object.model_validate_json(json_str)
+                            for field, value in model:
+                                setattr(self.viewmodel_linked_object, field, value)
+                        except Exception:
+                            success = False
+                    elif isinstance(self.viewmodel_linked_object, dict):
                         self.viewmodel_linked_object.update(kwargs[state_variable_name])
                     elif is_callable(self.viewmodel_linked_object):
                         cast(Callable, self.viewmodel_linked_object)(kwargs[state_variable_name])
                     else:
                         raise Exception("cannot update", self.viewmodel_linked_object)
-                    if self.viewmodel_callback_after_update:
+                    if self.viewmodel_callback_after_update and success:
                         self.viewmodel_callback_after_update(state_variable_name)
 
     def update_in_view(self, value: Any) -> None:
+        if issubclass(type(value), BaseModel):
+            value = value.model_dump()
         if self.linked_object_attributes:
             for attribute_name in self.linked_object_attributes:
                 name_in_state = self._get_name_in_state(attribute_name)
