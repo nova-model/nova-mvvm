@@ -178,22 +178,25 @@ class StateConnection:
 
                 @self.state.change(state_variable_name)
                 def update_viewmodel_callback(**kwargs: dict) -> None:
-                    success = True
+                    updated = True
                     if self.viewmodel_linked_object and issubclass(type(self.viewmodel_linked_object), BaseModel):
                         json_str = json.dumps(kwargs[state_variable_name])
                         try:
                             model = self.viewmodel_linked_object.model_validate_json(json_str)
-                            for field, value in model:
-                                setattr(self.viewmodel_linked_object, field, value)
+                            if model != self.viewmodel_linked_object:
+                                for field, value in model:
+                                    setattr(self.viewmodel_linked_object, field, value)
+                            else:
+                                updated = False
                         except Exception:
-                            success = False
+                            updated = False
                     elif isinstance(self.viewmodel_linked_object, dict):
                         self.viewmodel_linked_object.update(kwargs[state_variable_name])
                     elif is_callable(self.viewmodel_linked_object):
                         cast(Callable, self.viewmodel_linked_object)(kwargs[state_variable_name])
                     else:
                         raise Exception("cannot update", self.viewmodel_linked_object)
-                    if self.viewmodel_callback_after_update and success:
+                    if self.viewmodel_callback_after_update and updated:
                         self.viewmodel_callback_after_update(state_variable_name)
 
     def update_in_view(self, value: Any) -> None:
