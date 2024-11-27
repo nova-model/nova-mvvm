@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mvvm-lib"
-version = "0.4.0"
+version = "0.4.1"
 description = "A Python Package for Model-View-ViewModel pattern"
 authors = ["Yakubov, Sergey <yakubovs@ornl.gov>"]
 readme = "README.md"

@@ -10,7 +10,7 @@ from ..utils import rsetattr
 try:
     from PyQt6.QtCore import QObject, pyqtSignal
 except Exception:
-    print("PyQt6 is missing. You could install 'py-mvvm[pyqt6]' to fix it")
+    print("PyQt6 is missing. You should install 'mvvm-lib[pyqt6]' to fix it")
     exit(1)
 
 import inspect
@@ -39,7 +39,7 @@ class Communicator(QObject):
         self.callback_after_update = callback_after_update
 
     def _update_viewmodel_callback(self, key: Optional[str] = None, value: Any = None) -> None:
-        if issubclass(type(value), BaseModel):
+        if issubclass(type(self.viewmodel_linked_object), BaseModel):
             model = self.viewmodel_linked_object.copy(deep=True)
             rsetattr(model, key or "", value)
             try:
