@@ -1,5 +1,6 @@
-"""Binding module for PyQt6 framework."""
+"""Binding module for PyQt framework."""
 
+import os
 from typing import Any, Optional
 
 from pydantic import BaseModel
@@ -7,11 +8,18 @@ from pydantic import BaseModel
 from ..bindings_map import update_bindings_map
 from ..utils import rsetattr
 
-try:
-    from PyQt6.QtCore import QObject, pyqtSignal
-except Exception:
-    print("PyQt6 is missing. You should install 'mvvm-lib[pyqt6]' to fix it")
-    exit(1)
+if os.environ.get("QT_API", None) == "pyqt5":
+    try:
+        from PyQt5.QtCore import QObject, pyqtSignal
+    except Exception:
+        print("PyQt5 is missing. You should install 'mvvm-lib[pyqt5]' to fix it")
+        exit(1)
+else:
+    try:
+        from PyQt6.QtCore import QObject, pyqtSignal  # type: ignore
+    except Exception:
+        print("PyQt6 is missing. You should install 'mvvm-lib[pyqt6]' to fix it")
+        exit(1)
 
 import inspect
 
@@ -77,7 +85,7 @@ class Communicator(QObject):
 
 
 class PyQtBinding(BindingInterface):
-    """Binding Interface implementation for PyQt6."""
+    """Binding Interface implementation for PyQt."""
 
     def new_bind(
         self, linked_object: Any = None, linked_object_arguments: Any = None, callback_after_update: Any = None
