@@ -44,8 +44,6 @@ class TrameCommunicator(Communicator):
         callback_after_update: CallbackAfterUpdateType = None,
     ) -> None:
         self.state = state
-        update_bindings_map(viewmodel_linked_object, self)
-
         self.viewmodel_linked_object = viewmodel_linked_object
         self._set_linked_object_attributes(linked_object_attributes, viewmodel_linked_object)
         self.viewmodel_callback_after_update = callback_after_update
@@ -71,11 +69,12 @@ class TrameCommunicator(Communicator):
         if is_callable(connector):
             self.connection = CallBackConnection(self, connector)
         else:
-            self.connection = StateConnection(self, str(connector) if connector else None)
+            connector = str(connector) if connector else None
+            update_bindings_map(connector, self)
+            self.connection = StateConnection(self, connector)
         return self.connection.get_callback()
 
     def update_in_view(self, value: Any) -> None:
-        update_bindings_map(value, self)
         self.connection.update_in_view(value)
 
 
@@ -135,11 +134,17 @@ class StateConnection:
         self.linked_object_attributes = communicator.linked_object_attributes
         self._connect()
 
+    async def _handle_callback(self, arg: str) -> None:
+        if self.viewmodel_callback_after_update:
+            if inspect.iscoroutinefunction(self.viewmodel_callback_after_update):
+                await self.viewmodel_callback_after_update(arg)
+            else:
+                self.viewmodel_callback_after_update(arg)
+
     def _on_state_update(self, attribute_name: str, name_in_state: str) -> Callable:
-        def update(**_kwargs: Any) -> None:
+        async def update(**_kwargs: Any) -> None:
             rsetattr(self.viewmodel_linked_object, attribute_name, self.state[name_in_state])
-            if self.viewmodel_callback_after_update:
-                self.viewmodel_callback_after_update(attribute_name)
+            await self._handle_callback(attribute_name)
 
         return update
 
@@ -177,7 +182,7 @@ class StateConnection:
             elif state_variable_name:
 
                 @self.state.change(state_variable_name)
-                def update_viewmodel_callback(**kwargs: dict) -> None:
+                async def update_viewmodel_callback(**kwargs: dict) -> None:
                     updated = True
                     if self.viewmodel_linked_object and issubclass(type(self.viewmodel_linked_object), BaseModel):
                         json_str = json.dumps(kwargs[state_variable_name])
@@ -196,8 +201,8 @@ class StateConnection:
                         cast(Callable, self.viewmodel_linked_object)(kwargs[state_variable_name])
                     else:
                         raise Exception("cannot update", self.viewmodel_linked_object)
-                    if self.viewmodel_callback_after_update and updated:
-                        self.viewmodel_callback_after_update(state_variable_name)
+                    if updated:
+                        await self._handle_callback(state_variable_name)
 
     def update_in_view(self, value: Any) -> None:
         if issubclass(type(value), BaseModel):
