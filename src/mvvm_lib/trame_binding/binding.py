@@ -134,14 +134,17 @@ class StateConnection:
         self.linked_object_attributes = communicator.linked_object_attributes
         self._connect()
 
+    async def _handle_callback(self, arg: str) -> None:
+        if self.viewmodel_callback_after_update:
+            if inspect.iscoroutinefunction(self.viewmodel_callback_after_update):
+                await self.viewmodel_callback_after_update(arg)
+            else:
+                self.viewmodel_callback_after_update(arg)
+
     def _on_state_update(self, attribute_name: str, name_in_state: str) -> Callable:
         async def update(**_kwargs: Any) -> None:
             rsetattr(self.viewmodel_linked_object, attribute_name, self.state[name_in_state])
-            if self.viewmodel_callback_after_update:
-                if inspect.iscoroutinefunction(self.viewmodel_callback_after_update):
-                    await self.viewmodel_callback_after_update(attribute_name)
-                else:
-                    self.viewmodel_callback_after_update(attribute_name)
+            await self._handle_callback(attribute_name)
 
         return update
 
@@ -198,11 +201,8 @@ class StateConnection:
                         cast(Callable, self.viewmodel_linked_object)(kwargs[state_variable_name])
                     else:
                         raise Exception("cannot update", self.viewmodel_linked_object)
-                    if self.viewmodel_callback_after_update and updated:
-                        if inspect.iscoroutinefunction(self.viewmodel_callback_after_update):
-                            await self.viewmodel_callback_after_update(state_variable_name)
-                        else:
-                            self.viewmodel_callback_after_update(state_variable_name)
+                    if updated:
+                        await self._handle_callback(state_variable_name)
 
     def update_in_view(self, value: Any) -> None:
         if issubclass(type(value), BaseModel):
