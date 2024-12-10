@@ -32,20 +32,23 @@ def get_nested_pydantic_field(model: BaseModel, field_path: str) -> FieldInfo:
 
 
 def get_field_info(field_name: str) -> FieldInfo:
-    binding = bindings_map.get(field_name, None)
+    name = field_name.split(".")[0]
+    field_name = field_name.removeprefix(f"{name}.")
+    binding = bindings_map.get(name, None)
     if not binding:
-        raise Exception(f"Cannot find field {field_name}")
+        raise Exception(f"Cannot find binding for {name}")
     return get_nested_pydantic_field(binding.viewmodel_linked_object, field_name)
 
 
-def validate_pydantic_parameter(name: str, value: Any, index: int) -> str | None:
-    if name not in bindings_map:
-        logger.warning(f"cannot find {name} in bindings_map")  # no error, just do not validate for now
+def validate_pydantic_parameter(name: str, value: Any) -> str | None:
+    object_name = name.split(".")[0]
+    if object_name not in bindings_map:
+        logger.warning(f"cannot find {object_name} in bindings_map")  # no error, just do not validate for now
         return None
-    binding = bindings_map[name]
+    binding = bindings_map[object_name]
     current_model = binding.viewmodel_linked_object
     # get list of nested fields (if any) and get the corresponding model
-    fields = name.split(".")
+    fields = name.split(".")[1:]
     for field in fields[:-1]:
         if "[" in field:
             base = field.split("[")[0]
