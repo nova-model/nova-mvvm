@@ -94,4 +94,4 @@ sphinxcontrib-napoleon ="*"
 tomli = "^2.0.2"
 
 [tool.poetry.scripts]
-app = "mvvm_lib:main"
+app = "nova.mvvm:main"
