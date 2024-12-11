@@ -4,9 +4,10 @@ import logging
 import re
 from typing import Any
 
-from nova.mvvm import bindings_map
 from pydantic import BaseModel, ValidationError
 from pydantic.fields import FieldInfo
+
+from nova.mvvm import bindings_map
 
 logger = logging.getLogger(__name__)
 
