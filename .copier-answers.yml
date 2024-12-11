@@ -4,4 +4,4 @@ _src_path: https://code.ornl.gov/ndip/project-templates/python.git
 project_name: MVVM Library for Python
 publish_docs: true
 publish_to_pypi: true
-python_package: mvvm-lib
+python_package: nova-mvvm
