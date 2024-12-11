@@ -1,1 +1,5 @@
+<<<<<<< before updating
 dockerfiles
+=======
+dockerfiles/Dockerfile
+>>>>>>> after updating
