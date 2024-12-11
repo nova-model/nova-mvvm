@@ -85,9 +85,6 @@ tag-release:
   tags:
   - rse-multi-builder
 
-<<<<<<< before updating
-=======
-
 build-image:
   stage: publish
   variables:
@@ -111,7 +108,6 @@ build-image:
   tags:
     - rse-multi-builder
 
->>>>>>> after updating
 package-build:
   stage: publish
   script:
