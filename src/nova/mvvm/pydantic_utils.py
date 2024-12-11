@@ -7,7 +7,7 @@ from typing import Any
 from pydantic import BaseModel, ValidationError
 from pydantic.fields import FieldInfo
 
-from mvvm_lib import bindings_map
+from nova.mvvm import bindings_map
 
 logger = logging.getLogger(__name__)
 
