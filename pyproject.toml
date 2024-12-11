@@ -6,10 +6,8 @@ authors = ["Yakubov, Sergey <yakubovs@ornl.gov>"]
 readme = "README.md"
 license = "MIT"
 keywords = ["MVVM", "python"]
-packages = [{include = "nova", from = "src"}]
-
 packages = [
-  { include = "nova_mvvm", from = "src" }
+  { include = "nova", from = "src" }
 ]
 
 
