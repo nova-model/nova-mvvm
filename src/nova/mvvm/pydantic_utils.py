@@ -2,14 +2,35 @@
 
 import logging
 import re
-from typing import Any
+from typing import Any, Tuple
 
+from deepdiff import DeepDiff
 from pydantic import BaseModel, ValidationError
 from pydantic.fields import FieldInfo
 
 from nova.mvvm import bindings_map
 
 logger = logging.getLogger(__name__)
+
+
+def _format_tuple(input_tuple: Tuple) -> str:
+    res = ""
+    for item in input_tuple:
+        if isinstance(item, int):
+            formatted = f"[{item}]"
+        elif isinstance(item, str):
+            formatted = f".{item}" if res else item
+        else:
+            formatted = str(item)
+        res += formatted
+    return res
+
+
+def get_errored_fields_from_validation_error(e: ValidationError) -> list[str]:
+    res = []
+    for error in e.errors():
+        res.append(_format_tuple(error["loc"]))
+    return res
 
 
 def get_nested_pydantic_field(model: BaseModel, field_path: str) -> FieldInfo:
@@ -73,3 +94,19 @@ def validate_pydantic_parameter(name: str, value: Any) -> str | None:
             ):
                 return error["msg"]
     return None
+
+
+def _remove_brackets_suffix(s: str) -> str:
+    return re.sub(r"\[\d+\]$", "", s)
+
+
+def get_updated_fields(old: BaseModel, new: BaseModel) -> list[str]:
+    diff = DeepDiff(old, new)
+    updates: list[str] = []
+    if "values_changed" in diff:
+        updates = [k.removeprefix("root.") for k in diff["values_changed"].keys()]
+    for item in ["iterable_item_added", "iterable_item_removed"]:
+        if item in diff:
+            updates += [_remove_brackets_suffix(k.removeprefix("root.")) for k in diff[item].keys()]
+
+    return updates

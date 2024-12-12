@@ -5,7 +5,7 @@ import inspect
 import json
 from typing import Any, Callable, Optional, Union, cast
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 from trame_server.state import State
 from typing_extensions import override
 
@@ -18,6 +18,7 @@ from ..interface import (
     LinkedObjectAttributesType,
     LinkedObjectType,
 )
+from ..pydantic_utils import get_errored_fields_from_validation_error, get_updated_fields
 from ..utils import normalize_field_name, rget_list_of_fields, rgetattr, rsetattr
 
 
@@ -89,6 +90,8 @@ class CallBackConnection:
         self.linked_object_attributes = communicator.linked_object_attributes
 
     def _update_viewmodel_callback(self, value: Any, key: Optional[str] = None) -> None:
+        updates: list[str] = []
+        errors: list[str] = []
         if self.viewmodel_linked_object and issubclass(type(self.viewmodel_linked_object), BaseModel):
             model = self.viewmodel_linked_object.copy(deep=True)
             rsetattr(model, key or "", value)
@@ -113,7 +116,7 @@ class CallBackConnection:
             raise Exception("Cannot update", self.viewmodel_linked_object)
 
         if self.viewmodel_callback_after_update:
-            self.viewmodel_callback_after_update(key)
+            self.viewmodel_callback_after_update({"updated": updates, "errored": errors})
 
     def update_in_view(self, value: Any) -> None:
         self.callback(value)
@@ -134,17 +137,18 @@ class StateConnection:
         self.linked_object_attributes = communicator.linked_object_attributes
         self._connect()
 
-    async def _handle_callback(self, arg: str) -> None:
+    async def _handle_callback(self, results: dict) -> None:
         if self.viewmodel_callback_after_update:
             if inspect.iscoroutinefunction(self.viewmodel_callback_after_update):
-                await self.viewmodel_callback_after_update(arg)
+                await self.viewmodel_callback_after_update(results)
             else:
-                self.viewmodel_callback_after_update(arg)
+                self.viewmodel_callback_after_update(results)
 
     def _on_state_update(self, attribute_name: str, name_in_state: str) -> Callable:
         async def update(**_kwargs: Any) -> None:
+            updates: list[str] = [attribute_name]
             rsetattr(self.viewmodel_linked_object, attribute_name, self.state[name_in_state])
-            await self._handle_callback(attribute_name)
+            await self._handle_callback({"updated": updates, "errored": [], "error": None})
 
         return update
 
@@ -183,26 +187,34 @@ class StateConnection:
 
                 @self.state.change(state_variable_name)
                 async def update_viewmodel_callback(**kwargs: dict) -> None:
+                    updates: list[str] = []
+                    errors: list[str] = []
+                    error: Any = None
                     updated = True
                     if self.viewmodel_linked_object and issubclass(type(self.viewmodel_linked_object), BaseModel):
                         json_str = json.dumps(kwargs[state_variable_name])
                         try:
                             model = self.viewmodel_linked_object.model_validate_json(json_str)
                             if model != self.viewmodel_linked_object:
+                                updates = get_updated_fields(self.viewmodel_linked_object, model)
                                 for field, value in model:
                                     setattr(self.viewmodel_linked_object, field, value)
                             else:
                                 updated = False
-                        except Exception:
-                            updated = False
+                        except ValidationError as e:
+                            errors = get_errored_fields_from_validation_error(e)
+                            error = e
+                            updated = True
                     elif isinstance(self.viewmodel_linked_object, dict):
                         self.viewmodel_linked_object.update(kwargs[state_variable_name])
+                        updates.append(state_variable_name)
                     elif is_callable(self.viewmodel_linked_object):
                         cast(Callable, self.viewmodel_linked_object)(kwargs[state_variable_name])
+                        updates.append(state_variable_name)
                     else:
                         raise Exception("cannot update", self.viewmodel_linked_object)
                     if updated:
-                        await self._handle_callback(state_variable_name)
+                        await self._handle_callback({"updated": updates, "errored": errors, "error": error})
 
     def update_in_view(self, value: Any) -> None:
         if issubclass(type(value), BaseModel):

@@ -3,9 +3,10 @@
 import os
 from typing import Any, Callable, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from ..bindings_map import update_bindings_map
+from ..pydantic_utils import get_errored_fields_from_validation_error, get_updated_fields
 from ..utils import rsetattr
 
 if os.environ.get("QT_API", None) == "pyqt5":
@@ -49,16 +50,26 @@ class PyQtCommunicator(QObject):
 
     def _update_viewmodel_callback(self, key: Optional[str] = None, value: Any = None) -> None:
         if issubclass(type(self.viewmodel_linked_object), BaseModel):
+            updates: list[str] = []
+            errors: list[str] = []
+            error: Any = None
+            updated = True
             model = self.viewmodel_linked_object.copy(deep=True)
             if self.prefix and key:
                 key = key.removeprefix(f"{self.prefix}.")
             rsetattr(model, key or "", value)
             try:
                 new_model = model.__class__(**model.model_dump(warnings=False))
-                for f, v in new_model:
-                    setattr(self.viewmodel_linked_object, f, v)
-            except Exception:
-                pass
+                if new_model != self.viewmodel_linked_object:
+                    updates = get_updated_fields(self.viewmodel_linked_object, new_model)
+                    for field, value in new_model:
+                        setattr(self.viewmodel_linked_object, field, value)
+                else:
+                    updated = False
+            except ValidationError as e:
+                errors = get_errored_fields_from_validation_error(e)
+                error = e
+                updated = True
         elif isinstance(self.viewmodel_linked_object, dict):
             self.viewmodel_linked_object.update({key: value})
         elif is_callable(self.viewmodel_linked_object):
@@ -67,9 +78,8 @@ class PyQtCommunicator(QObject):
             rsetattr(self.viewmodel_linked_object, key or "", value)
         else:
             raise Exception("Cannot update", self.viewmodel_linked_object)
-
-        if self.callback_after_update:
-            self.callback_after_update(key)
+        if updated and self.callback_after_update:
+            self.callback_after_update({"updated": updates, "errored": errors, "error": error})
 
     def connect(self, name: str, callback: Callable) -> Any:
         # connect should be called from the View side to connect a
