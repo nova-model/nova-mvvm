@@ -6,7 +6,10 @@ authors = ["Yakubov, Sergey <yakubovs@ornl.gov>"]
 readme = "README.md"
 license = "MIT"
 keywords = ["MVVM", "python"]
-packages = [{include = "nova", from = "src"}]
+packages = [
+  { include = "nova", from = "src" }
+]
+
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -26,9 +29,6 @@ build-backend = "poetry.core.masonry.api"
 
 
 [tool.pytest.ini_options]
-pythonpath = [
-  ".", "src"
-]
 testpaths = ["tests"]
 python_files = ["test*.py"]
 norecursedirs = [".git", "tmp*", "_tmp*", "__pycache__"]
