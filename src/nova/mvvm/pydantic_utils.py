@@ -1,58 +1,38 @@
-"""Pydantic utils."""
+"""Module for utilities handling nested Pydantic models."""
 
 import logging
 import re
-from typing import Any, Tuple
+from typing import Any
 
-from deepdiff import DeepDiff
-from pydantic import BaseModel, ValidationError
+from pydantic import ValidationError
 from pydantic.fields import FieldInfo
 
-from nova.mvvm import bindings_map
+from . import bindings_map
+from ._internal.pydantic_utils import get_nested_pydantic_field
 
 logger = logging.getLogger(__name__)
 
 
-def _format_tuple(input_tuple: Tuple) -> str:
-    res = ""
-    for item in input_tuple:
-        if isinstance(item, int):
-            formatted = f"[{item}]"
-        elif isinstance(item, str):
-            formatted = f".{item}" if res else item
-        else:
-            formatted = str(item)
-        res += formatted
-    return res
-
-
-def get_errored_fields_from_validation_error(e: ValidationError) -> list[str]:
-    res = []
-    for error in e.errors():
-        res.append(_format_tuple(error["loc"]))
-    return res
-
-
-def get_nested_pydantic_field(model: BaseModel, field_path: str) -> FieldInfo:
-    fields = field_path.split(".")
-    current_model: Any = model
-
-    for field in fields:
-        if "[" in field:
-            base = field.split("[")[0]
-            current_model = getattr(current_model, base)
-            for _ in range(field.count("[")):
-                current_model = current_model[0]
-            continue
-        if issubclass(type(getattr(current_model, field)), BaseModel):
-            current_model = getattr(current_model, field)
-        else:
-            return current_model.model_fields[field]
-
-    raise Exception(f"Cannot find field {field_path}")
-
-
 def get_field_info(field_name: str) -> FieldInfo:
+    """
+    Retrieve the metadata of a field from a nested Pydantic model in corresponding binding based on the field name.
+
+    Parameters
+    ----------
+    field_name : str
+        A dot-separated string representing the binding and the field name, which may include nested fields
+        (e.g., "config.address.city.zipcode").
+
+    Returns
+    -------
+    FieldInfo
+        The metadata of the specified field.
+
+    Raises
+    ------
+    Exception
+        If the binding cannot be found in the bindings map or if the nested field cannot be found.
+    """
     name = field_name.split(".")[0]
     field_name = field_name.removeprefix(f"{name}.")
     binding = bindings_map.get(name, None)
@@ -62,6 +42,27 @@ def get_field_info(field_name: str) -> FieldInfo:
 
 
 def validate_pydantic_parameter(name: str, value: Any) -> str | None:
+    """
+    Validate a Pydantic model field using a dot-separated field path.
+
+    Parameters
+    ----------
+    name : str
+        A dot-separated string representing the path to the field to be validated
+        (e.g., "config.address.city.zipcode").
+    value : Any
+        The value to set for the field and validate.
+
+    Returns
+    -------
+    str | None
+        If validation fails, returns an error message indicating the validation issue.
+        If validation succeeds, returns `None`.
+
+    Raises
+    ------
+    None
+    """
     object_name = name.split(".")[0]
     if object_name not in bindings_map:
         logger.warning(f"cannot find {object_name} in bindings_map")  # no error, just do not validate for now
@@ -94,19 +95,3 @@ def validate_pydantic_parameter(name: str, value: Any) -> str | None:
             ):
                 return error["msg"]
     return None
-
-
-def _remove_brackets_suffix(s: str) -> str:
-    return re.sub(r"\[\d+\]$", "", s)
-
-
-def get_updated_fields(old: BaseModel, new: BaseModel) -> list[str]:
-    diff = DeepDiff(old, new)
-    updates: list[str] = []
-    if "values_changed" in diff:
-        updates = [k.removeprefix("root.") for k in diff["values_changed"].keys()]
-    for item in ["iterable_item_added", "iterable_item_removed"]:
-        if item in diff:
-            updates += [_remove_brackets_suffix(k.removeprefix("root.")) for k in diff[item].keys()]
-
-    return updates

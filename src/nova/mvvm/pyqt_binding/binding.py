@@ -5,9 +5,9 @@ from typing import Any, Callable, Optional
 
 from pydantic import BaseModel, ValidationError
 
-from ..bindings_map import update_bindings_map
-from ..pydantic_utils import get_errored_fields_from_validation_error, get_updated_fields
-from ..utils import rsetattr
+from .._internal.pydantic_utils import get_errored_fields_from_validation_error, get_updated_fields
+from .._internal.utils import rsetattr
+from ..bindings_map import bindings_map
 
 if os.environ.get("QT_API", None) == "pyqt5":
     try:
@@ -85,7 +85,7 @@ class PyQtCommunicator(QObject):
         # connect should be called from the View side to connect a
         # GUI element (via a function to change GUI element that is passed to the connect call)
         # and a linked_object (passed during bind creation from ViewModel side)
-        update_bindings_map(name, self)
+        bindings_map[name] = self
         self.prefix = name
         self.signal.connect(callback)
         if self.viewmodel_linked_object:

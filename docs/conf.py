@@ -24,7 +24,7 @@ with open("../pyproject.toml", "rb") as toml_file:
 
 sys.path.insert(0, os.path.abspath("../src"))
 
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "__main__.py"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "__main__.py", "_internal"]
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "sphinx_rtd_theme"]
 
 

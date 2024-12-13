@@ -9,7 +9,9 @@ from pydantic import BaseModel, ValidationError
 from trame_server.state import State
 from typing_extensions import override
 
-from ..bindings_map import update_bindings_map
+from .._internal.pydantic_utils import get_errored_fields_from_validation_error, get_updated_fields
+from .._internal.utils import normalize_field_name, rget_list_of_fields, rgetattr, rsetattr
+from ..bindings_map import bindings_map
 from ..interface import (
     BindingInterface,
     CallbackAfterUpdateType,
@@ -18,8 +20,6 @@ from ..interface import (
     LinkedObjectAttributesType,
     LinkedObjectType,
 )
-from ..pydantic_utils import get_errored_fields_from_validation_error, get_updated_fields
-from ..utils import normalize_field_name, rget_list_of_fields, rgetattr, rsetattr
 
 
 def is_async() -> bool:
@@ -71,7 +71,8 @@ class TrameCommunicator(Communicator):
             self.connection = CallBackConnection(self, connector)
         else:
             connector = str(connector) if connector else None
-            update_bindings_map(connector, self)
+            if connector:
+                bindings_map[connector] = self
             self.connection = StateConnection(self, connector)
         return self.connection.get_callback()
 

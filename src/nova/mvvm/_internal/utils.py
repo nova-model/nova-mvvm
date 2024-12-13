@@ -1,4 +1,4 @@
-"""Common utilities."""
+"""Internal common functions tp be used within the package."""
 
 import re
 from typing import Any
@@ -6,9 +6,6 @@ from typing import Any
 
 def normalize_field_name(field: str) -> str:
     return field.replace(".", "_").replace("[", "_").replace("]", "")
-
-
-#            .replace("_length", "n"))
 
 
 def list_has_objects(v: list) -> bool:
