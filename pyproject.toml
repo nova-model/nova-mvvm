@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nova-mvvm"
-version = "0.6.1"
+version = "0.7.0"
 description = "A Python Package for Model-View-ViewModel pattern"
 authors = ["Yakubov, Sergey <yakubovs@ornl.gov>"]
 readme = "README.md"
@@ -17,6 +17,7 @@ trame = "^3.6.3"
 pyqt5 = { version = "^5.15.11", optional = true }
 pyqt6 = { version = "^6.7.0", optional = true }
 panel = { version = "^1.4.4", optional = true }
+deepdiff = "^8.0.1"
 
 [tool.poetry.extras]
 pyqt5 = ["pyqt5"]
