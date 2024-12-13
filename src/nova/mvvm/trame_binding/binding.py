@@ -116,7 +116,7 @@ class CallBackConnection:
             raise Exception("Cannot update", self.viewmodel_linked_object)
 
         if self.viewmodel_callback_after_update:
-            self.viewmodel_callback_after_update({"updated": updates, "errored": errors})
+            self.viewmodel_callback_after_update({"updated": updates, "errored": errors, "error": None})
 
     def update_in_view(self, value: Any) -> None:
         self.callback(value)
