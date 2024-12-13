@@ -1,12 +1,14 @@
 """Abstract interfaces and type definitions."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Coroutine, Optional, Union
 
 LinkedObjectType = Optional[Any]
 LinkedObjectAttributesType = Optional[list[str]]
-CallbackAfterUpdateType = Optional[Callable[[Dict[str, Any]], None]]
 ConnectCallbackType = Union[None, Callable[[Any, Optional[str]], None]]
+CallbackAfterUpdateType = Union[
+    None, Callable[[dict[str, Any]], None], Callable[[dict[str, Any]], Coroutine[Any, Any, None]]
+]
 
 
 class Communicator(ABC):
