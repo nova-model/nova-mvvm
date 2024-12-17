@@ -54,7 +54,7 @@ class PyQtCommunicator(QObject):
             errors: list[str] = []
             error: Any = None
             updated = True
-            model = self.viewmodel_linked_object.copy(deep=True)
+            model = self.viewmodel_linked_object.model_copy(deep=True)
             if self.prefix and key:
                 key = key.removeprefix(f"{self.prefix}.")
             rsetattr(model, key or "", value)
