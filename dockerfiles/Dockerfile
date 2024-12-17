@@ -1,7 +1,8 @@
 FROM --platform=amd64 regproxy.ornl.gov/hub_proxy/python:3.10-slim AS source
 
-# make sure image can run as non-root user
+RUN apt-get update && apt-get install -y qt6-base-dev
 
+ENV QT_QPA_PLATFORM=offscreen
 
 ENV POETRY_CACHE_DIR=/poetry/.cache
 ENV POETRY_CONFIG_DIR=/poetry/.config
