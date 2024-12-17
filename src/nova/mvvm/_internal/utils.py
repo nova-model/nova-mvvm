@@ -1,7 +1,7 @@
 """Internal common functions tp be used within the package."""
 
 import re
-from typing import Any
+from typing import Any, Dict
 
 
 def normalize_field_name(field: str) -> str:
@@ -60,3 +60,30 @@ def rsetattr(obj: Any, attr: str, val: Any) -> Any:
                 obj = obj[index]
     else:
         setattr(obj, post, val)
+
+
+def rsetdictvalue(obj: Dict[str, Any], field: str, val: Any) -> Any:
+    keys = field.split(".")
+    current = obj
+    for key in keys[:-1]:
+        if "[" in key:
+            base = field.split("[")[0]
+            indices = re.findall(r"\[(\d+)\]", field)
+            indices = [int(num) for num in indices]
+            for i in indices:
+                current = current[base][i]
+        else:
+            current = current[key]
+    current[keys[-1]] = val
+
+
+def rgetdictvalue(obj: Dict[str, Any], field: str) -> Any:
+    fields = field.split(".")
+    for f in fields:
+        base = f.split("[")[0]
+        obj = obj[base]
+        indices = re.findall(r"\[(\d+)\]", f)
+        indices = [int(num) for num in indices]
+        for index in indices:
+            obj = obj[index]
+    return obj
