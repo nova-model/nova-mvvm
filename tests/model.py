@@ -26,6 +26,7 @@ class User(BaseModel):
     username: str = Field(
         default="default_user", min_length=2, title="User Name", description="hint", examples=["user"]
     )
+    email: Optional[str] = Field(default=None, title="Email Address")
     age: int = Field(default=30, gt=20)
     ranges: List[Range] = Field(
         default_factory=lambda: [
