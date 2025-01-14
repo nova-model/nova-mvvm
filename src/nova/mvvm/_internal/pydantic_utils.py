@@ -58,6 +58,8 @@ def get_updated_fields(old: BaseModel, new: BaseModel) -> list[str]:
     if "values_changed" in diff:
         # DeepDiff adds .root to the root object, we don't need that
         updates = [k.removeprefix("root.") for k in diff["values_changed"].keys()]
+    if "type_changes" in diff:
+        updates += [k.removeprefix("root.") for k in diff["type_changes"].keys()]
     for item in ["iterable_item_added", "iterable_item_removed"]:
         # for added/removed items DeepDiff adds its index, we don't need that as well
         if item in diff:

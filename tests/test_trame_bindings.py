@@ -44,6 +44,11 @@ test_cases: List[Dict[str, Any]] = [
         "result": {"value": "newname", "error": False},
     },
     {
+        "test_name": "update email",
+        "input": {"field": "email", "value": "test@test.com"},
+        "result": {"value": "test@test.com", "error": False},
+    },
+    {
         "test_name": "empty username",
         "input": {"field": "username", "value": ""},
         "result": {"value": "default_user", "error": True},
