@@ -18,7 +18,7 @@ class Communicator(ABC):
     """
 
     @abstractmethod
-    def connect(self, connector: Any = None) -> ConnectCallbackType:
+    def connect(self, *args: Any) -> ConnectCallbackType:
         """
         Connect a GUI element to a linked object.
 

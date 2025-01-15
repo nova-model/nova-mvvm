@@ -3,6 +3,9 @@
 import re
 from typing import Any, Dict
 
+from nova.mvvm import bindings_map
+from nova.mvvm.interface import LinkedObjectType
+
 
 def normalize_field_name(field: str) -> str:
     return field.replace(".", "_").replace("[", "_").replace("]", "")
@@ -87,3 +90,11 @@ def rgetdictvalue(obj: Dict[str, Any], field: str) -> Any:
         for index in indices:
             obj = obj[index]
     return obj
+
+
+def check_binding(linked_object: LinkedObjectType, name: str) -> None:
+    if name in bindings_map:
+        raise ValueError(f"cannot connect to binding {name}: name already used")
+    for communicator in bindings_map.values():
+        if communicator.viewmodel_linked_object and communicator.viewmodel_linked_object == linked_object:
+            raise ValueError(f"cannot connect to binding {name}: object already connected")

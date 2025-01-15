@@ -1,12 +1,13 @@
 """Binding module for PyQt framework."""
 
 import os
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel, ValidationError
+from typing_extensions import override
 
 from .._internal.pydantic_utils import get_errored_fields_from_validation_error, get_updated_fields
-from .._internal.utils import rsetattr
+from .._internal.utils import check_binding, rsetattr
 from ..bindings_map import bindings_map
 
 if os.environ.get("QT_API", None) == "pyqt5":
@@ -24,17 +25,21 @@ else:
 
 import inspect
 
-from ..interface import BindingInterface
+from ..interface import BindingInterface, Communicator, ConnectCallbackType
 
 
 def is_callable(var: Any) -> bool:
     return inspect.isfunction(var) or inspect.ismethod(var)
 
 
-class PyQtCommunicator(QObject):
-    """Communicator class, that provides methods required for binding to communicate between ViewModel and View."""
+class PyQtObject(QObject):
+    """PyQt object class."""
 
     signal = pyqtSignal(object)
+
+
+class PyQtCommunicator(Communicator):
+    """Communicator class, that provides methods required for binding to communicate between ViewModel and View."""
 
     def __init__(
         self,
@@ -43,6 +48,7 @@ class PyQtCommunicator(QObject):
         callback_after_update: Any = None,
     ) -> None:
         super().__init__()
+        self.pyqtobject = PyQtObject()
         self.viewmodel_linked_object = viewmodel_linked_object
         self.linked_object_attributes = linked_object_attributes
         self.callback_after_update = callback_after_update
@@ -81,23 +87,27 @@ class PyQtCommunicator(QObject):
         if updated and self.callback_after_update:
             self.callback_after_update({"updated": updates, "errored": errors, "error": error})
 
-    def connect(self, name: str, callback: Callable) -> Any:
+    @override
+    def connect(self, name: str, connector: Any) -> ConnectCallbackType:
         # connect should be called from the View side to connect a
         # GUI element (via a function to change GUI element that is passed to the connect call)
         # and a linked_object (passed during bind creation from ViewModel side)
-        if name in bindings_map:
-            raise Exception(f"cannot connect to binding {name}: already connected")
+        if not is_callable(connector):
+            raise ValueError("connector should be a callable type")
+
+        check_binding(self.viewmodel_linked_object, name)
         bindings_map[name] = self
         self.prefix = name
-        self.signal.connect(callback)
+        self.pyqtobject.signal.connect(connector)
         if self.viewmodel_linked_object:
             return self._update_viewmodel_callback
         else:
             return None
 
+    @override
     def update_in_view(self, value: Any) -> Any:
         """Update a View (GUI) when called by a ViewModel."""
-        return self.signal.emit(value)
+        return self.pyqtobject.signal.emit(value)
 
 
 class PyQtBinding(BindingInterface):

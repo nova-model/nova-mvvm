@@ -5,6 +5,7 @@ from typing import Any, Dict, List
 import pytest
 from PyQt6.QtWidgets import QLabel, QLineEdit, QMainWindow, QVBoxLayout, QWidget
 from pytestqt.qtbot import QtBot
+from typing_extensions import Generator
 
 from nova.mvvm import bindings_map
 from nova.mvvm.pydantic_utils import get_field_info
@@ -12,6 +13,12 @@ from nova.mvvm.pyqt_binding import PyQtBinding
 from nova.mvvm.pyqt_binding.binding import PyQtCommunicator
 
 from .model import User
+
+
+@pytest.fixture(scope="function")  # Default scope
+def function_scoped_fixture() -> Generator[str, None]:
+    yield "function"
+    bindings_map.clear()
 
 
 class MainWindow(QMainWindow):
@@ -27,8 +34,7 @@ class MainWindow(QMainWindow):
         self.username_edit_box.setText(config.username)
 
     def process_config_change(self, key: str, value: Any) -> None:
-        print(key, value)
-        self.callback_config_object(key, value)
+        self.callback_config_object(key, value)  # type: ignore
 
     def get_description(self, field: str, default: str = "") -> str:
         try:
@@ -50,7 +56,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(container)
 
 
-def test_binding_model_to_pyqt(qtbot: QtBot) -> None:
+def test_binding_model_to_pyqt(qtbot: QtBot, function_scoped_fixture: str) -> None:
     # Creates pyqt binding for a Pydantic object, updates model and validates that the PyQt element was updated.
 
     test_object = User()
@@ -85,7 +91,9 @@ test_cases: List[Dict[str, Any]] = [
     [(case["input"], case["result"]) for case in test_cases],
     ids=[case["test_name"] for case in test_cases],
 )
-def test_binding_pyqt_to_model(qtbot: QtBot, input: str, expected_result: Dict[str, Any]) -> None:
+def test_binding_pyqt_to_model(
+    qtbot: QtBot, input: str, expected_result: Dict[str, Any], function_scoped_fixture: str
+) -> None:
     # Creates pyqt binding for a Pydantic object, updates user interface state and validates that the model was updated
     # or validation error occurred.
     after_update_results = {}
@@ -105,4 +113,25 @@ def test_binding_pyqt_to_model(qtbot: QtBot, input: str, expected_result: Dict[s
     else:
         assert "username" in after_update_results["updated"]
     assert test_object.username == expected_result["value"]
-    bindings_map.clear()
+
+
+def test_pyqt_binding_same_name(function_scoped_fixture: str) -> None:
+    # Creates pyqt binding for with same name, expect error
+    test_object = User()
+    test_object2 = User()
+
+    binding = PyQtBinding().new_bind(test_object)
+    binding2 = PyQtBinding().new_bind(test_object2)
+    binding.connect("test_object", lambda: print("hello"))
+    with pytest.raises(ValueError):
+        binding2.connect("test_object", lambda: print("hello"))
+
+
+def test_binding_same_object(function_scoped_fixture: str) -> None:
+    # Creates pyqt binding for the same Pydantic object twice, expect error
+    test_object = User()
+
+    binding = PyQtBinding().new_bind(test_object)
+    binding.connect("test_object", lambda: print("hello"))
+    with pytest.raises(ValueError):
+        binding.connect("test_object1", lambda: print("hello"))
