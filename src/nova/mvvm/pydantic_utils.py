@@ -41,7 +41,7 @@ def get_field_info(field_name: str) -> FieldInfo:
     return get_nested_pydantic_field(binding.viewmodel_linked_object, field_name)
 
 
-def validate_pydantic_parameter(name: str, value: Any) -> str | None:
+def validate_pydantic_parameter(name: str, value: Any) -> str | bool:
     """
     Validate a Pydantic model field using a dot-separated field path.
 
@@ -55,9 +55,9 @@ def validate_pydantic_parameter(name: str, value: Any) -> str | None:
 
     Returns
     -------
-    str | None
+    str | bool
         If validation fails, returns an error message indicating the validation issue.
-        If validation succeeds, returns `None`.
+        If validation succeeds, returns True.
 
     Raises
     ------
@@ -66,7 +66,7 @@ def validate_pydantic_parameter(name: str, value: Any) -> str | None:
     object_name = name.split(".")[0]
     if object_name not in bindings_map:
         logger.warning(f"cannot find {object_name} in bindings_map")  # no error, just do not validate for now
-        return None
+        return True
     binding = bindings_map[object_name]
     current_model = binding.viewmodel_linked_object
     # get list of nested fields (if any) and get the corresponding model
@@ -94,4 +94,4 @@ def validate_pydantic_parameter(name: str, value: Any) -> str | None:
                 len(error["loc"]) == 0 and e.title == current_model.__class__.__name__
             ):
                 return error["msg"]
-    return None
+    return True
