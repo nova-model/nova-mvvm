@@ -8,6 +8,7 @@ import pytest_asyncio
 from trame.app import get_server
 from trame_server import Server
 
+from nova.mvvm import bindings_map
 from nova.mvvm._internal.utils import rgetattr, rsetdictvalue
 from nova.mvvm.trame_binding import TrameBinding
 
@@ -114,6 +115,7 @@ async def test_binding_trame_to_model(server: Server, input: Dict[str, Any], exp
     else:
         assert input["field"] in after_update_results["updated"]
     assert rgetattr(test_object, input["field"]) == expected_result["value"]
+    bindings_map.clear()
 
 
 @pytest.mark.asyncio
@@ -132,3 +134,16 @@ async def test_binding_model_to_trame(server: Server) -> None:
     test_object.username = "test"
     binding.update_in_view(test_object)
     assert server.state["test_object"]["username"] == "test"
+    bindings_map.clear()
+
+
+@pytest.mark.asyncio
+async def test_double_binding(server: Server) -> None:
+    # Creates trame binding for a Pydantic object twice, expect error
+    test_object = User()
+
+    binding = TrameBinding(server.state).new_bind(test_object)
+    binding.connect("test_object")
+    with pytest.raises(ValueError):
+        binding.connect("test_object")
+    bindings_map.clear()

@@ -77,7 +77,7 @@ class PyQtCommunicator(QObject):
         elif isinstance(self.viewmodel_linked_object, object):
             rsetattr(self.viewmodel_linked_object, key or "", value)
         else:
-            raise Exception("Cannot update", self.viewmodel_linked_object)
+            raise ValueError("Cannot update", self.viewmodel_linked_object)
         if updated and self.callback_after_update:
             self.callback_after_update({"updated": updates, "errored": errors, "error": error})
 
@@ -85,6 +85,8 @@ class PyQtCommunicator(QObject):
         # connect should be called from the View side to connect a
         # GUI element (via a function to change GUI element that is passed to the connect call)
         # and a linked_object (passed during bind creation from ViewModel side)
+        if name in bindings_map:
+            raise Exception(f"cannot connect to binding {name}: already connected")
         bindings_map[name] = self
         self.prefix = name
         self.signal.connect(callback)

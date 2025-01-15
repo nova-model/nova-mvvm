@@ -72,6 +72,8 @@ class TrameCommunicator(Communicator):
         else:
             connector = str(connector) if connector else None
             if connector:
+                if connector in bindings_map:
+                    raise ValueError(f"cannot connect to binding {connector}: already connected")
                 bindings_map[connector] = self
             self.connection = StateConnection(self, connector)
         return self.connection.get_callback()

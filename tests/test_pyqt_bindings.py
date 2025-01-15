@@ -6,6 +6,7 @@ import pytest
 from PyQt6.QtWidgets import QLabel, QLineEdit, QMainWindow, QVBoxLayout, QWidget
 from pytestqt.qtbot import QtBot
 
+from nova.mvvm import bindings_map
 from nova.mvvm.pydantic_utils import get_field_info
 from nova.mvvm.pyqt_binding import PyQtBinding
 from nova.mvvm.pyqt_binding.binding import PyQtCommunicator
@@ -104,3 +105,4 @@ def test_binding_pyqt_to_model(qtbot: QtBot, input: str, expected_result: Dict[s
     else:
         assert "username" in after_update_results["updated"]
     assert test_object.username == expected_result["value"]
+    bindings_map.clear()
