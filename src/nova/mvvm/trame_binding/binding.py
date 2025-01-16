@@ -10,7 +10,7 @@ from trame_server.state import State
 from typing_extensions import override
 
 from .._internal.pydantic_utils import get_errored_fields_from_validation_error, get_updated_fields
-from .._internal.utils import normalize_field_name, rget_list_of_fields, rgetattr, rsetattr
+from .._internal.utils import check_binding, normalize_field_name, rget_list_of_fields, rgetattr, rsetattr
 from ..bindings_map import bindings_map
 from ..interface import (
     BindingInterface,
@@ -72,10 +72,12 @@ class TrameCommunicator(Communicator):
         else:
             connector = str(connector) if connector else None
             if connector:
+                check_binding(self.viewmodel_linked_object, connector)
                 bindings_map[connector] = self
             self.connection = StateConnection(self, connector)
         return self.connection.get_callback()
 
+    @override
     def update_in_view(self, value: Any) -> None:
         self.connection.update_in_view(value)
 

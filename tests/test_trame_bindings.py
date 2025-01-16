@@ -8,10 +8,17 @@ import pytest_asyncio
 from trame.app import get_server
 from trame_server import Server
 
+from nova.mvvm import bindings_map
 from nova.mvvm._internal.utils import rgetattr, rsetdictvalue
 from nova.mvvm.trame_binding import TrameBinding
 
 from .model import User
+
+
+@pytest_asyncio.fixture(scope="function")  # Default scope
+async def function_scoped_fixture() -> AsyncGenerator[str, None]:
+    yield "function"
+    bindings_map.clear()
 
 
 @pytest_asyncio.fixture(scope="module")
@@ -93,7 +100,9 @@ test_cases: List[Dict[str, Any]] = [
     [(case["input"], case["result"]) for case in test_cases],
     ids=[case["test_name"] for case in test_cases],
 )
-async def test_binding_trame_to_model(server: Server, input: Dict[str, Any], expected_result: Dict[str, Any]) -> None:
+async def test_binding_trame_to_model(
+    server: Server, input: Dict[str, Any], expected_result: Dict[str, Any], function_scoped_fixture: str
+) -> None:
     # Creates trame binding for a Pydantic object, updates Trame state and validates that the model was updated
     # or validation error occurred.
     after_update_results = {}
@@ -117,7 +126,7 @@ async def test_binding_trame_to_model(server: Server, input: Dict[str, Any], exp
 
 
 @pytest.mark.asyncio
-async def test_binding_model_to_trame(server: Server) -> None:
+async def test_binding_model_to_trame(server: Server, function_scoped_fixture: str) -> None:
     # Creates trame binding for a Pydantic object, updates model and validates that the Trame state was updated.
     test_object = User()
 
@@ -132,3 +141,27 @@ async def test_binding_model_to_trame(server: Server) -> None:
     test_object.username = "test"
     binding.update_in_view(test_object)
     assert server.state["test_object"]["username"] == "test"
+
+
+@pytest.mark.asyncio
+async def test_binding_same_name(server: Server, function_scoped_fixture: str) -> None:
+    # Creates trame binding for with same name, expect error
+    test_object = User()
+    test_object2 = User()
+
+    binding = TrameBinding(server.state).new_bind(test_object)
+    binding.connect("test_object")
+    binding2 = TrameBinding(server.state).new_bind(test_object2)
+    with pytest.raises(ValueError):
+        binding2.connect("test_object")
+
+
+@pytest.mark.asyncio
+async def test_binding_same_object(server: Server, function_scoped_fixture: str) -> None:
+    # Creates trame binding for the same Pydantic object twice, expect error
+    test_object = User()
+
+    binding = TrameBinding(server.state).new_bind(test_object)
+    binding.connect("test_object")
+    with pytest.raises(ValueError):
+        binding.connect("test_object1")
