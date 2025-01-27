@@ -133,8 +133,7 @@ async def test_binding_model_to_trame(server: Server, function_scoped_fixture: s
     binding = TrameBinding(server.state).new_bind(test_object)
     binding.connect("test_object")
 
-    # object in state after update
-    binding.update_in_view(test_object)
+    # object in state by default
     assert server.state["test_object"]["username"] == "default_user"
 
     # object in state changed when we modify the model and update
