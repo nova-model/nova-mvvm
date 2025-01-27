@@ -174,7 +174,15 @@ class StateConnection:
         state_variable_name = self.state_variable_name
         # we need to make sure state variable exists on connect since if it does not - Trame will not monitor it
         if state_variable_name:
-            self.state.setdefault(state_variable_name, None)
+            if self.viewmodel_linked_object:
+                if issubclass(type(self.viewmodel_linked_object), BaseModel):
+                    self.state.setdefault(state_variable_name, self.viewmodel_linked_object.model_dump())
+                elif isinstance(self.viewmodel_linked_object, dict):
+                    self.state.setdefault(state_variable_name, self.viewmodel_linked_object)
+                else:
+                    self.state.setdefault(state_variable_name, None)
+            else:
+                self.state.setdefault(state_variable_name, None)
         for attribute_name in self.linked_object_attributes or []:
             name_in_state = self._get_name_in_state(attribute_name)
             self.state.setdefault(name_in_state, None)
