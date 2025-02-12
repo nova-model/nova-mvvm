@@ -1,6 +1,6 @@
-"""Binding module for PyQt framework."""
+"""Common communicator module for PyQt bindings."""
 
-import os
+import inspect
 from typing import Any, Optional
 
 from pydantic import BaseModel, ValidationError
@@ -9,33 +9,11 @@ from typing_extensions import override
 from .._internal.pydantic_utils import get_errored_fields_from_validation_error, get_updated_fields
 from .._internal.utils import check_binding, rsetattr
 from ..bindings_map import bindings_map
-
-if os.environ.get("QT_API", None) == "pyqt5":
-    try:
-        from PyQt5.QtCore import QObject, pyqtSignal
-    except Exception:
-        print("PyQt5 is missing. You should install 'mvvm-lib[pyqt5]' to fix it")
-        exit(1)
-else:
-    try:
-        from PyQt6.QtCore import QObject, pyqtSignal  # type: ignore
-    except Exception:
-        print("PyQt6 is missing. You should install 'mvvm-lib[pyqt6]' to fix it")
-        exit(1)
-
-import inspect
-
-from ..interface import BindingInterface, Communicator, ConnectCallbackType
+from ..interface import Communicator, ConnectCallbackType
 
 
 def is_callable(var: Any) -> bool:
     return inspect.isfunction(var) or inspect.ismethod(var)
-
-
-class PyQtObject(QObject):
-    """PyQt object class."""
-
-    signal = pyqtSignal(object)
 
 
 class PyQtCommunicator(Communicator):
@@ -43,12 +21,13 @@ class PyQtCommunicator(Communicator):
 
     def __init__(
         self,
+        pyqtobject: Any,
         viewmodel_linked_object: Any = None,
         linked_object_attributes: Any = None,
         callback_after_update: Any = None,
     ) -> None:
         super().__init__()
-        self.pyqtobject = PyQtObject()
+        self.pyqtobject = pyqtobject()
         self.viewmodel_linked_object = viewmodel_linked_object
         self.linked_object_attributes = linked_object_attributes
         self.callback_after_update = callback_after_update
@@ -108,17 +87,3 @@ class PyQtCommunicator(Communicator):
     def update_in_view(self, value: Any) -> Any:
         """Update a View (GUI) when called by a ViewModel."""
         return self.pyqtobject.signal.emit(value)
-
-
-class PyQtBinding(BindingInterface):
-    """Binding Interface implementation for PyQt."""
-
-    def new_bind(
-        self, linked_object: Any = None, linked_object_arguments: Any = None, callback_after_update: Any = None
-    ) -> Any:
-        """Each new_bind returns an object that can be used to bind a ViewModel/Model variable.
-
-        For PyQt we use pyqtSignal to trigger GU
-        I update and linked_object to trigger ViewModel/Model update
-        """
-        return PyQtCommunicator(linked_object, linked_object_arguments, callback_after_update)

@@ -8,9 +8,9 @@ from pytestqt.qtbot import QtBot
 from typing_extensions import Generator
 
 from nova.mvvm import bindings_map
+from nova.mvvm._internal.pyqt_communicator import PyQtCommunicator
 from nova.mvvm.pydantic_utils import get_field_info
-from nova.mvvm.pyqt_binding import PyQtBinding
-from nova.mvvm.pyqt_binding.binding import PyQtCommunicator
+from nova.mvvm.pyqt6_binding import PyQt6Binding
 
 from .model import User
 
@@ -61,7 +61,7 @@ def test_binding_model_to_pyqt(qtbot: QtBot, function_scoped_fixture: str) -> No
 
     test_object = User()
 
-    binding = PyQtBinding().new_bind(test_object)
+    binding = PyQt6Binding().new_bind(test_object)
     widget = MainWindow(binding)
     qtbot.addWidget(widget)
 
@@ -102,7 +102,7 @@ def test_binding_pyqt_to_model(
     def after_update(results: Dict[str, Any]) -> None:
         after_update_results.update(results)
 
-    binding = PyQtBinding().new_bind(test_object, callback_after_update=after_update)
+    binding = PyQt6Binding().new_bind(test_object, callback_after_update=after_update)
     widget = MainWindow(binding)
     qtbot.addWidget(widget)
 
@@ -120,8 +120,8 @@ def test_pyqt_binding_same_name(function_scoped_fixture: str) -> None:
     test_object = User()
     test_object2 = User()
 
-    binding = PyQtBinding().new_bind(test_object)
-    binding2 = PyQtBinding().new_bind(test_object2)
+    binding = PyQt6Binding().new_bind(test_object)
+    binding2 = PyQt6Binding().new_bind(test_object2)
     binding.connect("test_object", lambda: print("hello"))
     with pytest.raises(ValueError):
         binding2.connect("test_object", lambda: print("hello"))
@@ -131,7 +131,7 @@ def test_binding_same_object(function_scoped_fixture: str) -> None:
     # Creates pyqt binding for the same Pydantic object twice, expect error
     test_object = User()
 
-    binding = PyQtBinding().new_bind(test_object)
+    binding = PyQt6Binding().new_bind(test_object)
     binding.connect("test_object", lambda: print("hello"))
     with pytest.raises(ValueError):
         binding.connect("test_object1", lambda: print("hello"))
