@@ -54,18 +54,18 @@ def get_updated_fields(old: BaseModel, new: BaseModel) -> list[str]:
     then processed the results to build lists in a format we want.
     """
     diff = DeepDiff(old, new)
-    updates: list[str] = []
+    updates = set()
     if "values_changed" in diff:
         # DeepDiff adds .root to the root object, we don't need that
-        updates = [k.removeprefix("root.") for k in diff["values_changed"].keys()]
+        updates = {k.removeprefix("root.") for k in diff["values_changed"].keys()}
     if "type_changes" in diff:
-        updates += [k.removeprefix("root.") for k in diff["type_changes"].keys()]
+        updates |= {k.removeprefix("root.") for k in diff["type_changes"].keys()}
     for item in ["iterable_item_added", "iterable_item_removed"]:
         # for added/removed items DeepDiff adds its index, we don't need that as well
         if item in diff:
-            updates += [_remove_brackets_suffix(k.removeprefix("root.")) for k in diff[item].keys()]
+            updates |= {_remove_brackets_suffix(k.removeprefix("root.")) for k in diff[item].keys()}
 
-    return updates
+    return list(updates)
 
 
 def get_nested_pydantic_field(model: BaseModel, field_path: str) -> FieldInfo:
