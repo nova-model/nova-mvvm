@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nova-mvvm"
-version = "0.10.0"
+version = "0.10.1"
 description = "A Python Package for Model-View-ViewModel pattern"
 authors = ["Yakubov, Sergey <yakubovs@ornl.gov>"]
 readme = "README.md"
@@ -13,22 +13,18 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.10"
-trame = "^3.6.3"
-pyqt5 = { version = "^5.15.11", optional = true }
-pyqt6 = { version = "^6.7.0", optional = true }
-panel = { version = "^1.4.4", optional = true }
-deepdiff = "^8.0.1"
+trame = "*"
+pyqt5 = { version = "*", optional = true }
+pyqt6 = { version = "*", optional = true }
+panel = { version = "*", optional = true }
+deepdiff = "*"
 
-pytest-asyncio = "^0.25.0"
+
 [tool.poetry.extras]
 pyqt5 = ["pyqt5"]
 pyqt6 = ["pyqt6"]
 panel = ["panel"]
 
-[tool.poetry.group.dev.dependencies]
-pytest-qt = "^4.4.0"
-
-pyqt6 = "^6.8.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
@@ -87,17 +83,19 @@ omit = [
 command_line = "-m pytest --junit-xml=reports/junit.xml"
 data_file = "reports/.coverage"
 
-[tool.poetry.dev-dependencies]
-mypy = ">=1.10.0"
-pre-commit = ">=2.20.0"
-coverage = ">=6.4.3"
+[tool.poetry.group.dev.dependencies]
+mypy = "*"
+pre-commit = "*"
+coverage = "*"
 pytest = "*"
-ruff = ">=0.6.2"
-copier=">=9.3"
+ruff = "*"
+copier="*"
 sphinx = "*"
 sphinx-rtd-theme = "*"
 sphinxcontrib-napoleon ="*"
-tomli = "^2.0.2"
+tomli = "*"
+pytest-qt = "*"
+pytest-asyncio = "*"
 
 
 [tool.poetry.scripts]
