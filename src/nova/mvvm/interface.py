@@ -78,9 +78,10 @@ class BindingInterface(ABC):
         ----------
         linked_object : object, dictionary or function, optional
             Instance to link with the ViewModel/Model variable. When specified, changes in View
-            trigger update for this instance.
+            trigger update for this instance. We recommend to use a Pydantic model as an object since
+            it provides the means to validate data and use model metadate in GUI (like title, tips, ...)
 
-        linked_object_arguments : list of str, optional
+        linked_object_arguments : list of str, optional, ignored with Pydantic model
             If the `linked_object` is a class instance(object) one can provide a list of argument names associated
             with `linked_object` that define specific attributes
             to bind. If not provided, the default behavior is to bind all attributes.
