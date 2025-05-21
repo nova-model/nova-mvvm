@@ -96,5 +96,5 @@ def check_binding(linked_object: LinkedObjectType, name: str) -> None:
     if name in bindings_map:
         raise ValueError(f"cannot connect to binding {name}: name already used")
     for communicator in bindings_map.values():
-        if communicator.viewmodel_linked_object and communicator.viewmodel_linked_object == linked_object:
+        if communicator.viewmodel_linked_object and communicator.viewmodel_linked_object is linked_object:
             raise ValueError(f"cannot connect to binding {name}: object already connected")
