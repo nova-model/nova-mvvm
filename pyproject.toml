@@ -18,7 +18,7 @@ pyqt5 = { version = "*", optional = true }
 pyqt6 = { version = "*", optional = true }
 panel = { version = "*", optional = true }
 deepdiff = "*"
-
+pydantic = "*"
 
 [tool.poetry.extras]
 pyqt5 = ["pyqt5"]
