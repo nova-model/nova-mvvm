@@ -172,7 +172,7 @@ res = 0
 progress_value: float = -1
 
 
-def test_task(progress: ProgressCallback) -> None:
+def task(progress: ProgressCallback) -> None:
     global res
     res = 1
     progress("end", 100)
@@ -186,7 +186,7 @@ async def save_progress(_message: str, value: float) -> None:
 
 @pytest.mark.asyncio
 async def test_trame_worker(server: Server, function_scoped_fixture: str) -> None:
-    worker = TrameBinding(server.state).new_worker(test_task)
+    worker = TrameBinding(server.state).new_worker(task)
     worker.connect_progress(save_progress)
     worker.start()
     await asyncio.sleep(2)

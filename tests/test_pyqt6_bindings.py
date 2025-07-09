@@ -143,7 +143,7 @@ res = 0
 progress_value: float = -1
 
 
-def test_task(progress: Callable) -> None:
+def task(progress: Callable) -> None:
     global res
     res = 1
     progress("end", 100)
@@ -156,7 +156,7 @@ def save_progress(_message: str, value: float) -> None:
 
 
 def test_pyqt_worker(qtbot: QtBot, function_scoped_fixture: str) -> None:
-    worker = PyQt6Binding().new_worker(test_task)
+    worker = PyQt6Binding().new_worker(task)
     pyqt_worker = cast(PyQt6Worker, worker)
 
     worker.connect_progress(save_progress)
