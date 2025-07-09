@@ -1,6 +1,7 @@
 """Test package."""
 
 import asyncio
+import time
 from typing import Any, AsyncGenerator, Dict, List
 
 import pytest
@@ -11,6 +12,7 @@ from trame_server import Server
 from nova.mvvm import bindings_map
 from nova.mvvm._internal.utils import rgetattr, rsetdictvalue
 from nova.mvvm.trame_binding import TrameBinding
+from nova.mvvm.trame_binding.trame_worker import ProgressCallback
 
 from .model import User
 
@@ -164,3 +166,29 @@ async def test_binding_same_object(server: Server, function_scoped_fixture: str)
     binding.connect("test_object")
     with pytest.raises(ValueError):
         binding.connect("test_object1")
+
+
+res = 0
+progress_value: float = -1
+
+
+def test_task(progress: ProgressCallback) -> None:
+    global res
+    res = 1
+    progress("end", 100)
+    time.sleep(1)
+
+
+async def save_progress(_message: str, value: float) -> None:
+    global progress_value
+    progress_value = value
+
+
+@pytest.mark.asyncio
+async def test_trame_worker(server: Server, function_scoped_fixture: str) -> None:
+    worker = TrameBinding(server.state).new_worker(test_task)
+    worker.connect_progress(save_progress)
+    worker.start()
+    await asyncio.sleep(2)
+    assert res == 1
+    assert progress_value == 100

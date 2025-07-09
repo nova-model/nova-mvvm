@@ -1,6 +1,7 @@
 """Test package."""
 
-from typing import Any, Dict, List
+import time
+from typing import Any, Callable, Dict, List, cast
 
 import pytest
 from PyQt6.QtWidgets import QLabel, QLineEdit, QMainWindow, QVBoxLayout, QWidget
@@ -11,6 +12,7 @@ from nova.mvvm import bindings_map
 from nova.mvvm._internal.pyqt_communicator import PyQtCommunicator
 from nova.mvvm.pydantic_utils import get_field_info
 from nova.mvvm.pyqt6_binding import PyQt6Binding
+from nova.mvvm.pyqt6_binding.pyqt6_worker import PyQt6Worker
 
 from .model import User
 
@@ -135,3 +137,32 @@ def test_binding_same_object(function_scoped_fixture: str) -> None:
     binding.connect("test_object", lambda: print("hello"))
     with pytest.raises(ValueError):
         binding.connect("test_object1", lambda: print("hello"))
+
+
+res = 0
+progress_value: float = -1
+
+
+def test_task(progress: Callable) -> None:
+    global res
+    res = 1
+    progress("end", 100)
+    time.sleep(1)
+
+
+def save_progress(_message: str, value: float) -> None:
+    global progress_value
+    progress_value = value
+
+
+def test_pyqt_worker(qtbot: QtBot, function_scoped_fixture: str) -> None:
+    worker = PyQt6Binding().new_worker(test_task)
+    pyqt_worker = cast(PyQt6Worker, worker)
+
+    worker.connect_progress(save_progress)
+
+    with qtbot.waitSignal(pyqt_worker.signals.finished, timeout=2000):
+        worker.start()
+
+    assert res == 1
+    assert progress_value == 100

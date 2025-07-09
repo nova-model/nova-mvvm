@@ -19,7 +19,9 @@ from ..interface import (
     ConnectCallbackType,
     LinkedObjectAttributesType,
     LinkedObjectType,
+    Worker,
 )
+from .trame_worker import TrameWorker
 
 
 def is_async() -> bool:
@@ -256,3 +258,7 @@ class TrameBinding(BindingInterface):
         callback_after_update: CallbackAfterUpdateType = None,
     ) -> TrameCommunicator:
         return TrameCommunicator(self._state, linked_object, linked_object_arguments, callback_after_update)
+
+    @override
+    def new_worker(self, task: Callable[..., Any], *args: Any, **kwargs: Any) -> Worker:
+        return TrameWorker(task, *args, **kwargs)

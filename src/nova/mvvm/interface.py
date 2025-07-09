@@ -11,6 +11,58 @@ CallbackAfterUpdateType = Union[
 ]
 
 
+class Worker:
+    """Abstract worker class.
+
+    Provides methods required to run tasks in backend.
+    """
+
+    @abstractmethod
+    def start(self) -> None:
+        """Start running the task in a background thread."""
+        raise NotImplementedError("start() must be implemented in a subclass")
+
+    @abstractmethod
+    def connect_result(self, callback: Callable[[Any], None]) -> None:
+        """
+        Register a callback to be called with the result when the task finishes.
+
+        Args:
+            callback (Callable[[Any], None]): Function called with the result.
+        """
+        raise NotImplementedError("connect_result() must be implemented in a subclass")
+
+    @abstractmethod
+    def connect_error(self, callback: Callable[[Exception], None]) -> None:
+        """
+        Register a callback to be called if the task raises an exception.
+
+        Args:
+            callback (Callable[[Exception], None]): Function called with the exception.
+        """
+        raise NotImplementedError("connect_error() must be implemented in a subclass")
+
+    @abstractmethod
+    def connect_finished(self, callback: Callable[[], None]) -> None:
+        """
+        Register a callback to be called when the task has finished (success or failure).
+
+        Args:
+            callback (Callable[[], None]): Function called with no arguments.
+        """
+        raise NotImplementedError("connect_finished() must be implemented in a subclass")
+
+    @abstractmethod
+    def connect_progress(self, callback: Any) -> None:
+        """
+        Register a callback to be called with progress updates (0 to 100).
+
+        Args:
+            callback (Callable[[float], None]): Function called with a float progress value.
+        """
+        raise NotImplementedError("connect_progress() must be implemented in a subclass")
+
+
 class Communicator(ABC):
     """Abstract communicator class.
 
@@ -96,4 +148,9 @@ class BindingInterface(ABC):
             An object that manages the binding, allowing updates to propagate between the
             ViewModel/Model variable and the GUI framework element.
         """
+        raise Exception("Please implement in a concrete class")
+
+    @abstractmethod
+    def new_worker(self, task: Callable[..., Any], *args: Any, **kwargs: Any) -> Worker:
+        """Creates an instance of a Worker class to be used to run tasks in background."""
         raise Exception("Please implement in a concrete class")
