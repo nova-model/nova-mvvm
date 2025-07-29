@@ -3,7 +3,7 @@
 import asyncio
 import inspect
 import json
-from typing import Any, Callable, Optional, Union, cast
+from typing import Any, Callable, List, Optional, Union, cast
 
 from pydantic import BaseModel, ValidationError
 from trame_server.state import State
@@ -50,7 +50,7 @@ class TrameCommunicator(Communicator):
         self.viewmodel_linked_object = viewmodel_linked_object
         self._set_linked_object_attributes(linked_object_attributes, viewmodel_linked_object)
         self.viewmodel_callback_after_update = callback_after_update
-        self.connection: Union[CallBackConnection, StateConnection]
+        self.connections: List[Union[CallBackConnection, StateConnection]] = []
 
     def _set_linked_object_attributes(
         self, linked_object_attributes: LinkedObjectAttributesType, viewmodel_linked_object: LinkedObjectType
@@ -70,18 +70,25 @@ class TrameCommunicator(Communicator):
     @override
     def connect(self, connector: Any = None) -> ConnectCallbackType:
         if is_callable(connector):
-            self.connection = CallBackConnection(self, connector)
+            new_connection = CallBackConnection(self, connector)
         else:
             connector = str(connector) if connector else None
             if connector:
                 check_binding(self.viewmodel_linked_object, connector)
                 bindings_map[connector] = self
-            self.connection = StateConnection(self, connector)
-        return self.connection.get_callback()
+            new_connection = StateConnection(self, connector)
+        
+        self.connections.append(new_connection)
+
+        return new_connection.get_callback()
 
     @override
     def update_in_view(self, value: Any) -> None:
-        self.connection.update_in_view(value)
+        if not self.connections:
+            raise ValueError("You must call connect on this binding before calling update_in_view.")
+
+        for connection in self.connections:
+            connection.update_in_view(value)
 
 
 class CallBackConnection:
