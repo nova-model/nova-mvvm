@@ -69,6 +69,7 @@ class TrameCommunicator(Communicator):
 
     @override
     def connect(self, connector: Any = None) -> ConnectCallbackType:
+        new_connection: Union[CallBackConnection, StateConnection]
         if is_callable(connector):
             new_connection = CallBackConnection(self, connector)
         else:
@@ -77,7 +78,7 @@ class TrameCommunicator(Communicator):
                 check_binding(self.viewmodel_linked_object, connector)
                 bindings_map[connector] = self
             new_connection = StateConnection(self, connector)
-        
+
         self.connections.append(new_connection)
 
         return new_connection.get_callback()
