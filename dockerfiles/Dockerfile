@@ -1,4 +1,4 @@
-FROM --platform=amd64 regproxy.ornl.gov/hub_proxy/python:3.10-slim AS source
+FROM --platform=amd64 python:3.10-slim AS source
 
 RUN apt-get update && apt-get install -y qt6-base-dev
 
