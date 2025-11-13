@@ -1,6 +1,10 @@
 FROM --platform=amd64 python:3.10-slim AS source
 
-RUN apt-get update && apt-get install -y curl qt6-base-dev wget
+RUN apt-get update && apt-get install -y \
+    curl \
+    libglib2.0-dev \
+    qt6-base-dev \
+    wget
 
 ENV QT_QPA_PLATFORM=offscreen
 
