@@ -8,9 +8,8 @@ You can install nova-mvvm directly with
 
     pip install nova-mvvm
 
-or with `Poetry <https://python-poetry.org/>`_ by placing the following in your :code:`pyproject.toml` (you can version lock with typical `Semantic Versioning <https://semver.org/>`_ syntax):
+or with `Pixi <https://pixi.sh/latest/>`_:
 
-.. code-block:: toml
+.. code-block:: base
 
-    [tool.poetry.dependencies]
-    nova-mvvm = "*"
+    pixi add --pypi nova-mvvm
