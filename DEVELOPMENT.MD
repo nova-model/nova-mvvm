@@ -5,11 +5,10 @@ the MVVM Library for Python project.
 
 ## Starting from the template
 
-- Add other Python dependencies you project need with `poetry add xxx` or `poetry add --dev xxx`
+- Add other Python dependencies you project need with [`Pixi add`](https://pixi.sh/dev/reference/cli/pixi/add/#pixi-add).
 - Modify Dockerfile as needed. Please make sure it can still run as non-root (we use it in GitHub Actions and in general this
 is a good practice).
-- install pre-commit (if not already installed) - `pip install pre-commit`
-- activate `pre-commit` for your project: `cd <project folder> && pre-commit install`
+- install pre-commit (if not already installed) - `pixi run pre-commit install`
 - finally, clear the content of this section and add the description of your project. You can keep/adjust instructions
 below
 
@@ -23,15 +22,13 @@ to create an issue [in this repo](https://code.ornl.gov/ndip/project-templates/p
 ## Installation
 
 ```commandline
-pip install poetry
-
-poetry install
+pixi install
 ```
 
 ## Running
 ### From source
 ```bash
-poetry run app
+pixi run app
 ```
 
 ### Using Docker
@@ -44,23 +41,23 @@ docker run nova-mvvm
 
 ## Formatting
 ```commandline
-poetry run ruff format
+pixi run ruff format
 ```
 
 ## Linting
 ```commandline
-poetry run ruff check
-poetry run mypy .
+pixi run ruff check
+pixi run mypy .
 ```
 
 ## Testing
 ```commandline
-poetry run pytest
+pixi run pytest
 ```
 or, with coverage
 ```commandline
-poetry run coverage run
-poetry run coverage report
+pixi run coverage run
+pixi run coverage report
 ```
 
 ## Updating project from template
@@ -69,7 +66,7 @@ This project was created from a [template](https://code.ornl.gov/ndip/project-te
 can try to update the project to incorporate these changes. Just enter the project folder, make sure `git status`
 shows it clean, and run:
 ```
-poetry run copier update
+copier update
 ```
 See [here](https://copier.readthedocs.io/en/stable/updating/#updating-a-project) for more information.
 
