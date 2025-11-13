@@ -25,6 +25,7 @@ production = {features = [], solve-group = "default"}
 
 [tool.pixi.pypi-dependencies]
 nova-mvvm = { path = ".", editable = true }
+hatch = "*"
 trame = "*"
 deepdiff = "*"
 pydantic = "*"
