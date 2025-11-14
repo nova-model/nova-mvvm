@@ -1540,8 +1540,11 @@ packages:
 - pypi: ./
   name: nova-mvvm
   version: 0.12.0
-  sha256: c7ee0c2ba794978d8310c43d8ee52efc42e652d51731ad18c55b1f39d62c2699
+  sha256: 5470c2b7dd4dd030a207737627764b66a653113080b5671f6bedf61e07b6af73
   requires_dist:
+  - trame
+  - deepdiff
+  - pydantic
   - pyqt5 ; extra == 'pyqt5'
   - pyqt6 ; extra == 'pyqt6'
   - panel ; extra == 'panel'

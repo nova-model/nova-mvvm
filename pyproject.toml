@@ -7,6 +7,11 @@ readme = "README.md"
 license = "MIT"
 keywords = ["MVVM", "python"]
 requires-python = ">=3.10,<3.14"
+dependencies = [
+    "trame",
+    "deepdiff",
+    "pydantic",
+]
 
 [project.optional-dependencies]
 pyqt5 = ["pyqt5"]
@@ -26,9 +31,6 @@ production = {features = [], solve-group = "default"}
 [tool.pixi.pypi-dependencies]
 nova-mvvm = { path = ".", editable = true }
 hatch = "*"
-trame = "*"
-deepdiff = "*"
-pydantic = "*"
 
 [tool.pixi.feature.dev.pypi-dependencies]
 pyqt5 = "*"
