@@ -194,10 +194,10 @@ class StateConnection:
         if is_async():
             with self.state:
                 state_obj[name_in_state] = value
-                self.state.dirty(name_in_state)
+                self.state.dirty(base_name)
         else:
             state_obj[name_in_state] = value
-            self.state.dirty(name_in_state)
+            self.state.dirty(base_name)
 
     def _get_name_in_state(self, attribute_name: str) -> str:
         name_in_state = normalize_field_name(attribute_name)
