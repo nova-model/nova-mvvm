@@ -191,6 +191,14 @@ class StateConnection:
             # until that is complete we need to skip error tracking for them.
             return
 
+        # If the update is not necessary, we should not force it as doing so can trigger
+        # view model callbacks.
+        try:
+            if state_obj[name_in_state] == value:
+                return
+        except KeyError:
+            pass
+
         if is_async():
             with self.state:
                 state_obj[name_in_state] = value

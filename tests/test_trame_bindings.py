@@ -42,9 +42,9 @@ async def flush_state(server: Server, obj: str) -> None:
     await asyncio.sleep(1)
 
 
-async def update_value_in_state(input: Dict[str, Any], index: int, server: Server) -> None:
-    rsetdictvalue(server.state[f"test_object_{index}"], input["field"], input["value"])
-    await flush_state(server, f"test_object_{index}")
+async def update_value_in_state(input: Dict[str, Any], server: Server) -> None:
+    rsetdictvalue(server.state["test_object"], input["field"], input["value"])
+    await flush_state(server, "test_object")
 
 
 test_cases: List[Dict[str, Any]] = [
@@ -99,13 +99,11 @@ test_cases: List[Dict[str, Any]] = [
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "input, expected_result, index",
-    [(case["input"], case["result"], index) for index, case in enumerate(test_cases)],
+    "input, expected_result",
+    [(case["input"], case["result"]) for case in test_cases],
     ids=[case["test_name"] for case in test_cases],
 )
-async def test_binding_trame_to_model(
-    server: Server, input: Dict[str, Any], expected_result: Dict[str, Any], index: int
-) -> None:
+async def test_binding_trame_to_model(server: Server, input: Dict[str, Any], expected_result: Dict[str, Any]) -> None:
     # Creates trame binding for a Pydantic object, updates Trame state and validates that the model was updated
     # or validation error occurred.
     after_update_results = {}
@@ -115,10 +113,10 @@ async def test_binding_trame_to_model(
         after_update_results.update(results)
 
     binding = TrameBinding(server.state).new_bind(test_object, callback_after_update=after_update)
-    binding.connect(f"test_object_{index}")
+    binding.connect("test_object")
     binding.update_in_view(test_object)
 
-    await update_value_in_state(input, index, server)
+    await update_value_in_state(input, server)
 
     if expected_result["error"]:
         errored_field = expected_result.get("errored_field", input["field"])
