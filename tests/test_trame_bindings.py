@@ -196,10 +196,6 @@ async def test_binding_incorrect_value(server: Server) -> None:
     binding2.connect("test_empty")
     binding2.update_in_view(test_user)
 
-    # Verify that the Pydantic errors field is included in the state for both bindings.
-    assert server.state.test_range[ERROR_FIELD_NAME] == []
-    assert server.state.test_empty[ERROR_FIELD_NAME] == []
-
     # Verify that an error is added correctly on change
     with server.state:
         server.state.test_range["min_value"] = 11

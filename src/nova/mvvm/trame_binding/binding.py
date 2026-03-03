@@ -288,10 +288,8 @@ class StateConnection:
                 name_in_state = self._get_name_in_state(attribute_name)
                 value_to_change = rgetattr(value, attribute_name)
                 self._set_variable_in_state(name_in_state, value_to_change)
-            self._set_variable_in_state(f"{name_in_state}.{ERROR_FIELD_NAME}", [])
         elif self.state_variable_name:
             self._set_variable_in_state(self.state_variable_name, value)
-            self._set_variable_in_state(f"{self.state_variable_name}.{ERROR_FIELD_NAME}", [])
 
     def get_callback(self) -> ConnectCallbackType:
         return None
