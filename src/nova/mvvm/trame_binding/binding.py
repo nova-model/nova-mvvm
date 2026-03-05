@@ -176,7 +176,7 @@ class StateConnection:
 
         return update
 
-    def _set_variable_in_state(self, name_in_state: str, value: Any) -> None:
+    def _set_variable_in_state(self, name_in_state: str, value: Any, force: bool = False) -> None:
         if "." in name_in_state:
             base_name, name_in_state = name_in_state.split(".", maxsplit=1)
             if self.state[base_name] is None:
@@ -194,7 +194,7 @@ class StateConnection:
         # If the update is not necessary, we should not force it as doing so can trigger
         # view model callbacks.
         try:
-            if state_obj[name_in_state] == value:
+            if not force and state_obj[name_in_state] == value:
                 return
         except KeyError:
             pass
@@ -287,9 +287,9 @@ class StateConnection:
             for attribute_name in self.linked_object_attributes:
                 name_in_state = self._get_name_in_state(attribute_name)
                 value_to_change = rgetattr(value, attribute_name)
-                self._set_variable_in_state(name_in_state, value_to_change)
+                self._set_variable_in_state(name_in_state, value_to_change, force=True)
         elif self.state_variable_name:
-            self._set_variable_in_state(self.state_variable_name, value)
+            self._set_variable_in_state(self.state_variable_name, value, force=True)
 
     def get_callback(self) -> ConnectCallbackType:
         return None
