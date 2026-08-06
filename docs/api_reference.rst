@@ -16,3 +16,6 @@ Bindings
 
 .. automodule:: nova.mvvm.pyqt5_binding
    :members:
+
+.. automodule:: nova.mvvm.panel_binding
+   :members:

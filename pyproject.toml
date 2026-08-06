@@ -1,6 +1,6 @@
 [project]
 name = "nova-mvvm"
-version = "0.16.4"
+version = "1.0.0"
 description = "A Python Package for Model-View-ViewModel pattern"
 authors = [
     { name = "Sergey Yakubov", email = "yakubovs@ornl.gov" },
@@ -10,17 +10,33 @@ authors = [
 readme = "README.md"
 license = "MIT"
 keywords = ["MVVM", "python"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 requires-python = ">=3.10,<3.14"
 dependencies = [
-    "trame",
-    "deepdiff",
-    "pydantic",
+    "trame>=3",
+    "deepdiff>=8",
+    "pydantic>=2",
 ]
 
+[project.urls]
+Homepage = "https://github.com/nova-sdk/nova-mvvm"
+Documentation = "https://nova-application-development.readthedocs.io/projects/mvvm-lib/en/latest/"
+Repository = "https://github.com/nova-sdk/nova-mvvm"
+Issues = "https://github.com/nova-sdk/nova-mvvm/issues"
+
 [project.optional-dependencies]
-pyqt5 = ["pyqt5"]
-pyqt6 = ["pyqt6"]
-panel = ["panel"]
+pyqt5 = ["pyqt5>=5.15"]
+pyqt6 = ["pyqt6>=6"]
+panel = ["panel>=1"]
 
 [tool.pixi.workspace]
 channels = ["conda-forge"]

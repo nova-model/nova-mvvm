@@ -13,17 +13,17 @@ data changes, you simply bind the UI components to the data in the
 ViewModel, and the updates happen automatically.
 
 
-Data Binding with NOVA
-----------------------
+Data Binding with nova-mvvm
+---------------------------
 
 The **nova-mvvm** library greatly simplifies the data
 synchronization between the components of an MVVM application and
-provides support for user interfaces utilizing the Trame, PyQt, and
-Panel graphical frameworks. The library provides several predefined
-classes including TrameBinding, PyQtBinding, and PanelBinding to connect
-UI components to model variables.
+provides support for user interfaces utilizing the Trame, PyQt5, PyQt6,
+and Panel graphical frameworks. The library provides TrameBinding,
+PyQt5Binding, PyQt6Binding, and PanelBinding classes to connect UI
+components to model variables.
 
-Here, we will focus on the TrameBinding class, but all three function similarly.
+Here, we focus on the TrameBinding class, but all four follow the same binding interface.
 
 How to use TrameBinding
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -46,7 +46,7 @@ actions to be performed after updates to the UI. In the code snippet
 below, we’ve passed the Binding Interface to the ViewModel. The
 ViewModel adds the ``model`` variable to the binding interface. This
 ``new_bind`` method returns a :class:`nova.mvvm.interface.Communicator`. The ``Communicator`` is
-an object which manages the binding and will be used to propgate
+an object which manages the binding and will be used to propagate
 updates.
 
 .. code:: python

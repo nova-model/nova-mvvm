@@ -10,6 +10,6 @@ You can install nova-mvvm directly with
 
 or with `Pixi <https://pixi.sh/latest/>`_:
 
-.. code-block:: base
+.. code-block:: bash
 
     pixi add --pypi nova-mvvm

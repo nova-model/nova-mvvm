@@ -3,8 +3,7 @@
 Core Concepts
 ==============
 
-In this section we'll decribbe core concepts that
-are used in nova-mvvm library:
+This section describes the core concepts used by the nova-mvvm library:
 
 .. toctree::
    :maxdepth: 1

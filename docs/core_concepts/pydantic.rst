@@ -32,7 +32,7 @@ Pydantic uses Python type hints to define data models. When you create
 an instance of a Pydantic model, Pydantic automatically validates the
 input data against the defined types and constraints.
 
-For edxample, let's define a ``User`` model with two fields: ``id`` and
+For example, let's define a ``User`` model with two fields: ``id`` and
 ``name``. We use type hints to specify the data type for each field
 (e.g., ``int``, ``str``) and ``Field`` with validation arguments to
 specify additional constraints (e.g., ``gt=0``, ``min_length=1``, …).

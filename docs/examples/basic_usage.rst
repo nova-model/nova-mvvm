@@ -4,8 +4,7 @@ MVVM Example Using Trame Framework
 This example demonstrates a simple application using the MVVM (Model-View-ViewModel) design pattern.
 We'll use the `Trame` framework along with the `TrameBinding` interface from `nova-mvvm`.
 
-For more information and examples, we recommend looking at the tutorial from the
-`Neutrons Open Visualization and Analysis (NOVA) Framework Developer Workshop <https://example.com/nova-tutorial>`_.
+For framework-specific details, see the `Trame documentation <https://trame.readthedocs.io/>`_.
 
 
 MVVM consists of three parts:

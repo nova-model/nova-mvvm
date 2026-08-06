@@ -1,14 +1,14 @@
-==========================================
-NOVA MVVM library documentation
-==========================================
+=====================================
+nova-mvvm documentation
+=====================================
 
-Thank you for your interest in developing interactive applications
-for `NOVA <https://nova.ornl.gov/>`_. This documentation will guide you through the process of creating a new application and deploying it to NOVA.
+``nova-mvvm`` provides Model-View-ViewModel data bindings for Python GUI
+applications. It separates application state and logic from UI implementation
+while keeping changes synchronized between the View and ViewModel.
 
-Interactive applications for NOVA are developed with the `Trame Framework <https://kitware.github.io/trame/>`_. This framework allows you to build full web applications in Python.
-
-To make it easier to get started, we provide a UI package, :code:`nova-trame`, that should help streamline your development process. All examples in this documentation are based upon this package.
-
+The library supports Trame, PyQt5, PyQt6, and Panel. The included example uses
+Trame, while the binding interfaces provide a consistent MVVM structure across
+the supported frameworks.
 
 .. toctree::
    :maxdepth: 2
@@ -17,4 +17,5 @@ To make it easier to get started, we provide a UI package, :code:`nova-trame`, t
    installation
    core_concepts/index
    examples/index
+   interface
    api_reference
